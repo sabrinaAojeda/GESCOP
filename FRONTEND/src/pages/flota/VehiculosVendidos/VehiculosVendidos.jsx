@@ -1,63 +1,74 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { useApp } from '../../../context/AppContext';
+import { useTableActions } from '../../../hooks/useTableActions';
+import { useFiltros } from '../../../hooks/useFiltros';
 
 const VehiculosVendidos = () => {
-  const [vehiculosVendidos] = useState([
-    {
-      id: 1,
-      interno: "045",
-      dominio: "MN-789-PQ",
-      modelo: "Volkswagen Amarok",
-      fechaVenta: "2024-01-15",
-      comprador: "Empresa XYZ",
-      precio: "$25,000,000",
-      estadoDocumentacion: "Completa"
-    },
-    {
-      id: 2,
-      interno: "028",
-      dominio: "RS-456-AB",
-      modelo: "Ford Ranger Wildtrak",
-      fechaVenta: "2024-02-20",
-      comprador: "Transportes ABC",
-      precio: "$22,500,000",
-      estadoDocumentacion: "Pendiente"
-    }
-  ]);
+  const { vehiculosVendidos } = useApp();
+  const { generarBotonesAcciones } = useTableActions();
+
+  const columnasConfig = [
+    { key: 'interno', label: 'Interno', visible: true },
+    { key: 'dominio', label: 'Dominio', visible: true },
+    { key: 'modelo', label: 'Marca/Modelo', visible: true },
+    { key: 'fechaVenta', label: 'Fecha Venta', visible: true },
+    { key: 'comprador', label: 'Comprador', visible: true },
+    { key: 'precio', label: 'Precio', visible: true },
+    { key: 'estadoDocumentacion', label: 'Estado Documentación', visible: true }
+  ];
+
+  const {
+    datosFiltrados,
+    filtros,
+    manejarBusqueda,
+    manejarFiltroEspecifico,
+    cantidadFiltrados,
+    cantidadTotal
+  } = useFiltros(vehiculosVendidos, columnasConfig);
 
   const getEstadoClass = (estado) => {
-    switch(estado) {
-      case 'Completa': return 'status-active';
-      case 'Pendiente': return 'status-warning';
-      case 'Incompleta': return 'status-expired';
-      default: return '';
+    if (!estado) return '';
+    switch(estado.toLowerCase()) {
+      case 'completa':
+        return 'status-active';
+      case 'en trámite':
+        return 'status-warning';
+      case 'incompleta':
+        return 'status-expired';
+      default:
+        return '';
     }
   };
 
   const formatearFecha = (fechaString) => {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString('es-AR');
+    if (!fechaString) return '';
+    try {
+      const fecha = new Date(fechaString);
+      return fecha.toLocaleDateString('es-AR');
+    } catch (e) {
+      return fechaString;
+    }
+  };
+
+  const formatearPrecio = (precio) => {
+    if (!precio) return '';
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    }).format(precio);
   };
 
   return (
-    <div id="vehiculos-vendidos-page" className="page active">
+    <div>
       <div className="breadcrumb">
-        <Link to="/dashboard">Dashboard</Link> 
+        <a href="/dashboard">Dashboard</a> 
         <span>Vehículos Vendidos</span>
       </div>
       
       <div className="summary-cards">
         <div className="summary-card-small">
           <div className="number">{vehiculosVendidos.length}</div>
-          <div className="label">Vehículos Vendidos</div>
-        </div>
-        <div className="summary-card-small">
-          <div className="number">$47,500,000</div>
-          <div className="label">Total en Ventas</div>
-        </div>
-        <div className="summary-card-small">
-          <div className="number">2</div>
-          <div className="label">Ventas Este Mes</div>
+          <div className="label">vehículos vendidos</div>
         </div>
       </div>
 
@@ -65,9 +76,24 @@ const VehiculosVendidos = () => {
         <div className="section-header">
           <h2 className="section-title">💰 Vehículos Vendidos</h2>
           <div className="table-toolbar">
-            <button className="btn btn-secondary">
-              <span>👁️</span> Columnas
-            </button>
+            <div className="column-selector">
+              <button className="btn btn-secondary">
+                <span>👁️</span> Columnas
+              </button>
+              <div className="column-selector-content">
+                {columnasConfig.map(columna => (
+                  <label key={columna.key} className="column-option">
+                    <input 
+                      type="checkbox" 
+                      checked={columna.visible} 
+                      onChange={() => {}} 
+                      disabled={columna.key === 'interno' || columna.key === 'dominio'}
+                    />
+                    {columna.label}
+                  </label>
+                ))}
+              </div>
+            </div>
             <button className="btn btn-secondary">
               <span>📤</span> Exportar
             </button>
@@ -78,17 +104,27 @@ const VehiculosVendidos = () => {
         </div>
 
         <div className="filter-bar">
-          <input type="text" className="filter-select" placeholder="Buscar..." />
-          <select className="filter-select">
-            <option>Todos los años</option>
-            <option>2024</option>
-            <option>2023</option>
-            <option>2022</option>
+          <input 
+            type="text" 
+            className="filter-select" 
+            placeholder="Buscar..." 
+            value={filtros.busqueda}
+            onChange={(e) => manejarBusqueda(e.target.value)}
+          />
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('comprador', e.target.value)}
+          >
+            <option value="">Todos los compradores</option>
+            <option value="Empresa XYZ">Empresa XYZ</option>
+            <option value="Empresa A">Empresa A</option>
+            <option value="Empresa B">Empresa B</option>
           </select>
           <select className="filter-select">
-            <option>Todos los compradores</option>
-            <option>Empresa XYZ</option>
-            <option>Transportes ABC</option>
+            <option value="">Todos los años</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
           </select>
         </div>
 
@@ -106,14 +142,14 @@ const VehiculosVendidos = () => {
             </tr>
           </thead>
           <tbody>
-            {vehiculosVendidos.map(vehiculo => (
+            {datosFiltrados.map(vehiculo => (
               <tr key={vehiculo.id}>
                 <td>{vehiculo.interno}</td>
                 <td>{vehiculo.dominio}</td>
                 <td>{vehiculo.modelo}</td>
                 <td>{formatearFecha(vehiculo.fechaVenta)}</td>
                 <td>{vehiculo.comprador}</td>
-                <td>{vehiculo.precio}</td>
+                <td>{formatearPrecio(vehiculo.precio)}</td>
                 <td>
                   <span className={`status-badge ${getEstadoClass(vehiculo.estadoDocumentacion)}`}>
                     {vehiculo.estadoDocumentacion}
@@ -121,16 +157,29 @@ const VehiculosVendidos = () => {
                 </td>
                 <td>
                   <div className="action-buttons">
-                    <button className="icon-btn" title="Ver">👁️</button>
-                    <button className="icon-btn" title="Documentación">📄</button>
-                    <button className="icon-btn" title="Contrato">📝</button>
+                    <button 
+                      className="icon-btn" 
+                      title="Ver"
+                      onClick={() => {}}
+                    >
+                      👁️
+                    </button>
+                    <button 
+                      className="icon-btn" 
+                      title="Documentación"
+                      onClick={() => {}}
+                    >
+                      📄
+                    </button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="contador">Mostrando {vehiculosVendidos.length} vehículos vendidos</div>
+        <div className="contador">
+          Mostrando {cantidadFiltrados} de {cantidadTotal} vehículos vendidos
+        </div>
       </section>
     </div>
   );

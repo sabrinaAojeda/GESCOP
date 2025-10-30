@@ -1,73 +1,67 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { useApp } from '../../../context/AppContext';
+import { useTableActions } from '../../../hooks/useTableActions';
+import { useFiltros } from '../../../hooks/useFiltros';
 
 const EquipamientoVehiculos = () => {
-  const [equipamientos] = useState([
-    {
-      id: 1,
-      codigo: "GPS-001",
-      descripcion: "Sistema de Rastreo GPS",
-      tipo: "GPS",
-      vehiculoAsignado: "AB-123-CD",
-      estado: "Operativo",
-      ultimaRevision: "2024-02-15",
-      proximaRevision: "2024-05-15"
-    },
-    {
-      id: 2,
-      codigo: "CAM-002",
-      descripcion: "Cámara de Reversa",
-      tipo: "Cámara",
-      vehiculoAsignado: "EF-456-GH",
-      estado: "Mantenimiento",
-      ultimaRevision: "2024-01-10",
-      proximaRevision: "2024-02-10"
-    },
-    {
-      id: 3,
-      codigo: "RAD-003",
-      descripcion: "Radio Comunicación VHF",
-      tipo: "Radio",
-      vehiculoAsignado: "IJ-789-KL",
-      estado: "Operativo",
-      ultimaRevision: "2024-03-01",
-      proximaRevision: "2024-06-01"
-    }
-  ]);
+  const { equipamiento } = useApp();
+  const { generarBotonesAcciones } = useTableActions();
+
+  const columnasConfig = [
+    { key: 'codigo', label: 'Código', visible: true },
+    { key: 'descripcion', label: 'Descripción', visible: true },
+    { key: 'tipo', label: 'Tipo', visible: true },
+    { key: 'vehiculoAsignado', label: 'Vehículo Asignado', visible: true },
+    { key: 'estado', label: 'Estado', visible: true },
+    { key: 'ultimaRevision', label: 'Última Revisión', visible: true },
+    { key: 'proximaRevision', label: 'Próxima Revisión', visible: true },
+    { key: 'observaciones', label: 'Observaciones', visible: false }
+  ];
+
+  const {
+    datosFiltrados,
+    filtros,
+    manejarBusqueda,
+    manejarFiltroEspecifico,
+    cantidadFiltrados,
+    cantidadTotal
+  } = useFiltros(equipamiento, columnasConfig);
 
   const getEstadoClass = (estado) => {
-    switch(estado) {
-      case 'Operativo': return 'status-active';
-      case 'Mantenimiento': return 'status-warning';
-      case 'Inactivo': return 'status-expired';
-      default: return '';
+    if (!estado) return '';
+    switch(estado.toLowerCase()) {
+      case 'operativo':
+        return 'status-active';
+      case 'mantenimiento':
+        return 'status-warning';
+      case 'inactivo':
+        return 'status-expired';
+      default:
+        return '';
     }
   };
 
   const formatearFecha = (fechaString) => {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString('es-AR');
+    if (!fechaString) return '';
+    try {
+      const fecha = new Date(fechaString);
+      return fecha.toLocaleDateString('es-AR');
+    } catch (e) {
+      return fechaString;
+    }
   };
 
   return (
-    <div id="equipamiento-vehiculos-page" className="page active">
+    <div>
       <div className="breadcrumb">
-        <Link to="/dashboard">Dashboard</Link> 
+        <a href="/dashboard">Dashboard</a> 
         <span>Equipamiento</span>
       </div>
       
       <div className="summary-cards">
         <div className="summary-card-small">
-          <div className="number">{equipamientos.length}</div>
-          <div className="label">Ítems Operativo</div>
-        </div>
-        <div className="summary-card-small">
-          <div className="number">2</div>
-          <div className="label">En Mantenimiento</div>
-        </div>
-        <div className="summary-card-small">
-          <div className="number">5</div>
-          <div className="label">Próximos a Revisar</div>
+          <div className="number">{equipamiento.length}</div>
+          <div className="label">ítems operativo</div>
         </div>
       </div>
 
@@ -75,9 +69,24 @@ const EquipamientoVehiculos = () => {
         <div className="section-header">
           <h2 className="section-title">🔧 Equipamiento</h2>
           <div className="table-toolbar">
-            <button className="btn btn-secondary">
-              <span>👁️</span> Columnas
-            </button>
+            <div className="column-selector">
+              <button className="btn btn-secondary">
+                <span>👁️</span> Columnas
+              </button>
+              <div className="column-selector-content">
+                {columnasConfig.map(columna => (
+                  <label key={columna.key} className="column-option">
+                    <input 
+                      type="checkbox" 
+                      checked={columna.visible} 
+                      onChange={() => {}} 
+                      disabled={columna.key === 'codigo' || columna.key === 'descripcion'}
+                    />
+                    {columna.label}
+                  </label>
+                ))}
+              </div>
+            </div>
             <button className="btn btn-secondary">
               <span>📤</span> Exportar
             </button>
@@ -88,19 +97,31 @@ const EquipamientoVehiculos = () => {
         </div>
 
         <div className="filter-bar">
-          <input type="text" className="filter-select" placeholder="Buscar..." />
-          <select className="filter-select">
-            <option>Todos los tipos</option>
-            <option>GPS</option>
-            <option>Radio</option>
-            <option>Cámara</option>
-            <option>Herramientas</option>
+          <input 
+            type="text" 
+            className="filter-select" 
+            placeholder="Buscar..." 
+            value={filtros.busqueda}
+            onChange={(e) => manejarBusqueda(e.target.value)}
+          />
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('tipo', e.target.value)}
+          >
+            <option value="">Todos los tipos</option>
+            <option value="GPS">GPS</option>
+            <option value="Radio">Radio</option>
+            <option value="Cámara">Cámara</option>
+            <option value="Herramientas">Herramientas</option>
           </select>
-          <select className="filter-select">
-            <option>Todos los estados</option>
-            <option>Operativo</option>
-            <option>Mantenimiento</option>
-            <option>Inactivo</option>
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('estado', e.target.value)}
+          >
+            <option value="">Todos los estados</option>
+            <option value="Operativo">Operativo</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Inactivo">Inactivo</option>
           </select>
         </div>
 
@@ -118,32 +139,33 @@ const EquipamientoVehiculos = () => {
             </tr>
           </thead>
           <tbody>
-            {equipamientos.map(equipo => (
-              <tr key={equipo.id}>
-                <td>{equipo.codigo}</td>
-                <td>{equipo.descripcion}</td>
-                <td>{equipo.tipo}</td>
-                <td>{equipo.vehiculoAsignado}</td>
+            {datosFiltrados.map(item => (
+              <tr key={item.id}>
+                <td>{item.codigo}</td>
+                <td>{item.descripcion}</td>
+                <td>{item.tipo}</td>
+                <td>{item.vehiculoAsignado}</td>
                 <td>
-                  <span className={`status-badge ${getEstadoClass(equipo.estado)}`}>
-                    {equipo.estado}
+                  <span className={`status-badge ${getEstadoClass(item.estado)}`}>
+                    {item.estado}
                   </span>
                 </td>
-                <td>{formatearFecha(equipo.ultimaRevision)}</td>
-                <td>{formatearFecha(equipo.proximaRevision)}</td>
+                <td>{formatearFecha(item.ultimaRevision)}</td>
+                <td>{formatearFecha(item.proximaRevision)}</td>
                 <td>
                   <div className="action-buttons">
                     <button className="icon-btn" title="Ver">👁️</button>
                     <button className="icon-btn" title="Editar">✏️</button>
                     <button className="icon-btn" title="Documentación">📄</button>
-                    <button className="icon-btn" title="Historial">📊</button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="contador">Mostrando {equipamientos.length} ítems de equipamiento</div>
+        <div className="contador">
+          Mostrando {cantidadFiltrados} de {cantidadTotal} ítems de equipamiento
+        </div>
       </section>
     </div>
   );

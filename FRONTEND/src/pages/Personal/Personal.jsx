@@ -1,84 +1,88 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { useApp } from '../../context/AppContext';
+import { useTableActions } from '../../hooks/useTableActions';
+import { useFiltros } from '../../hooks/useFiltros';
 
 const Personal = () => {
-  const [personal] = useState([
-    {
-      id: 1,
-      legajo: "1001",
-      nombreCompleto: "Juan Pérez",
-      dni: "30.123.456",
-      sector: "Logística",
-      cargo: "Chofer",
-      estado: "Activo",
-      licenciaVencimiento: "2024-08-15"
-    },
-    {
-      id: 2,
-      legajo: "1002",
-      nombreCompleto: "María García",
-      dni: "29.987.654",
-      sector: "Producción",
-      cargo: "Operaria",
-      estado: "Licencia",
-      licenciaVencimiento: "2024-05-20"
-    },
-    {
-      id: 3,
-      legajo: "1003",
-      nombreCompleto: "Carlos Rodríguez",
-      dni: "31.456.789",
-      sector: "Mantenimiento",
-      cargo: "Mecánico",
-      estado: "Activo",
-      licenciaVencimiento: "2024-11-10"
-    }
-  ]);
+  const { personal } = useApp();
+  const { generarBotonesAcciones } = useTableActions();
+
+  const columnasConfig = [
+    { key: 'legajo', label: 'Legajo', visible: true },
+    { key: 'nombre', label: 'Nombre Completo', visible: true },
+    { key: 'dni', label: 'DNI', visible: true },
+    { key: 'sector', label: 'Sector', visible: true },
+    { key: 'cargo', label: 'Cargo', visible: true },
+    { key: 'estado', label: 'Estado', visible: true },
+    { key: 'licenciaVencimiento', label: 'Licencia Venc.', visible: true },
+    { key: 'telefono', label: 'Teléfono', visible: false },
+    { key: 'email', label: 'Email', visible: false }
+  ];
+
+  const {
+    datosFiltrados,
+    filtros,
+    manejarBusqueda,
+    manejarFiltroEspecifico,
+    cantidadFiltrados,
+    cantidadTotal
+  } = useFiltros(personal, columnasConfig);
 
   const getEstadoClass = (estado) => {
-    switch(estado) {
-      case 'Activo': return 'status-active';
-      case 'Licencia':
-      case 'Vacaciones': return 'status-warning';
-      case 'Inactivo': return 'status-expired';
-      default: return '';
+    if (!estado) return '';
+    switch(estado.toLowerCase()) {
+      case 'activo':
+        return 'status-active';
+      case 'licencia':
+      case 'vacaciones':
+        return 'status-warning';
+      case 'inactivo':
+        return 'status-expired';
+      default:
+        return '';
     }
   };
 
   const formatearFecha = (fechaString) => {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString('es-AR');
-  };
-
-  const getAlertCount = () => {
-    const hoy = new Date();
-    const treintaDias = new Date();
-    treintaDias.setDate(hoy.getDate() + 30);
-    
-    return personal.filter(p => {
-      const vencimiento = new Date(p.licenciaVencimiento);
-      return vencimiento <= treintaDias && vencimiento >= hoy;
-    }).length;
+    if (!fechaString) return '';
+    try {
+      const fecha = new Date(fechaString);
+      return fecha.toLocaleDateString('es-AR');
+    } catch (e) {
+      return fechaString;
+    }
   };
 
   return (
-    <div id="personal-page" className="page active">
+    <div>
       <div className="breadcrumb">
-        <Link to="/dashboard">Dashboard</Link> 
+        <a href="/dashboard">Dashboard</a> 
         <span>Personal</span>
       </div>
 
+      {/* Resumen cards */}
       <div className="summary-cards">
         <div className="summary-card-small">
           <div className="number">{personal.length}</div>
           <div className="label">Empleados Activos</div>
         </div>
         <div className="summary-card-small">
-          <div className="number">{personal.filter(p => p.estado === 'Activo').length}</div>
+          <div className="number">
+            {personal.filter(p => p.estado === 'Activo').length}
+          </div>
           <div className="label">Con Licencia Vigente</div>
         </div>
         <div className="summary-card-small">
-          <div className="number">{getAlertCount()}</div>
+          <div className="number">
+            {personal.filter(p => {
+              if (!p.licenciaVencimiento) return false;
+              const vencimiento = new Date(p.licenciaVencimiento);
+              const hoy = new Date();
+              const diffTime = vencimiento - hoy;
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              return diffDays <= 30 && diffDays > 0;
+            }).length}
+          </div>
           <div className="label">Licencias por Vencer</div>
         </div>
       </div>
@@ -87,9 +91,24 @@ const Personal = () => {
         <div className="section-header">
           <h2 className="section-title">👥 Gestión de Personal</h2>
           <div className="table-toolbar">
-            <button className="btn btn-secondary">
-              <span>👁️</span> Columnas
-            </button>
+            <div className="column-selector">
+              <button className="btn btn-secondary">
+                <span>👁️</span> Columnas
+              </button>
+              <div className="column-selector-content">
+                {columnasConfig.map(columna => (
+                  <label key={columna.key} className="column-option">
+                    <input 
+                      type="checkbox" 
+                      checked={columna.visible} 
+                      onChange={() => {}} 
+                      disabled={columna.key === 'legajo' || columna.key === 'nombre'}
+                    />
+                    {columna.label}
+                  </label>
+                ))}
+              </div>
+            </div>
             <button className="btn btn-secondary">
               <span>📤</span> Exportar
             </button>
@@ -100,20 +119,32 @@ const Personal = () => {
         </div>
 
         <div className="filter-bar">
-          <input type="text" className="filter-select" placeholder="Buscar empleado..." />
-          <select className="filter-select">
-            <option>Todos los sectores</option>
-            <option>Logística</option>
-            <option>Producción</option>
-            <option>Administración</option>
-            <option>Mantenimiento</option>
+          <input 
+            type="text" 
+            className="filter-select" 
+            placeholder="Buscar empleado..." 
+            value={filtros.busqueda}
+            onChange={(e) => manejarBusqueda(e.target.value)}
+          />
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('sector', e.target.value)}
+          >
+            <option value="">Todos los sectores</option>
+            <option value="Logística">Logística</option>
+            <option value="Producción">Producción</option>
+            <option value="Administración">Administración</option>
+            <option value="Mantenimiento">Mantenimiento</option>
           </select>
-          <select className="filter-select">
-            <option>Todos los estados</option>
-            <option>Activo</option>
-            <option>Vacaciones</option>
-            <option>Licencia</option>
-            <option>Inactivo</option>
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('estado', e.target.value)}
+          >
+            <option value="">Todos los estados</option>
+            <option value="Activo">Activo</option>
+            <option value="Vacaciones">Vacaciones</option>
+            <option value="Licencia">Licencia</option>
+            <option value="Inactivo">Inactivo</option>
           </select>
         </div>
 
@@ -131,32 +162,29 @@ const Personal = () => {
             </tr>
           </thead>
           <tbody>
-            {personal.map(empleado => (
-              <tr key={empleado.id}>
-                <td>{empleado.legajo}</td>
-                <td>{empleado.nombreCompleto}</td>
-                <td>{empleado.dni}</td>
-                <td>{empleado.sector}</td>
-                <td>{empleado.cargo}</td>
+            {datosFiltrados.map(persona => (
+              <tr key={persona.id}>
+                <td>{persona.legajo}</td>
+                <td>{persona.nombre}</td>
+                <td>{persona.dni}</td>
+                <td>{persona.sector}</td>
+                <td>{persona.cargo}</td>
                 <td>
-                  <span className={`status-badge ${getEstadoClass(empleado.estado)}`}>
-                    {empleado.estado}
+                  <span className={`status-badge ${getEstadoClass(persona.estado)}`}>
+                    {persona.estado}
                   </span>
                 </td>
-                <td>{formatearFecha(empleado.licenciaVencimiento)}</td>
+                <td>{formatearFecha(persona.licenciaVencimiento)}</td>
                 <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn" title="Ver">👁️</button>
-                    <button className="icon-btn" title="Editar">✏️</button>
-                    <button className="icon-btn" title="Documentación">📄</button>
-                    <button className="icon-btn" title="Licencias">🚗</button>
-                  </div>
+                  {generarBotonesAcciones('personal', persona.id, persona)}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="contador">Mostrando {personal.length} empleados</div>
+        <div className="contador">
+          Mostrando {cantidadFiltrados} de {cantidadTotal} empleados
+        </div>
       </section>
     </div>
   );

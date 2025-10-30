@@ -1,86 +1,116 @@
-// FRONTEND/src/hooks/useTableActions.js
-import { useState } from 'react';
+import { useApp } from '../context/AppContext';
 
 export const useTableActions = () => {
-  const [documentModalOpen, setDocumentModalOpen] = useState(false);
-  const [selectedItemForDocs, setSelectedItemForDocs] = useState(null);
+  const { 
+    abrirModal, 
+    eliminarVehiculo, 
+    eliminarPersonal,
+    eliminarSede,
+    eliminarProveedor,
+    vehiculos,
+    personal,
+    sedes,
+    proveedores
+  } = useApp();
 
-  // Abrir modal de documentos
-  const openDocumentModal = (item) => {
-    setSelectedItemForDocs(item);
-    setDocumentModalOpen(true);
-  };
-
-  // Cerrar modal de documentos
-  const closeDocumentModal = () => {
-    setDocumentModalOpen(false);
-    setSelectedItemForDocs(null);
-  };
-
-  // Subir documento
-  const uploadDocument = (file, documentType) => {
-    // En una implementación real, aquí subirías el archivo al servidor
-    console.log('Subiendo documento:', file.name, 'Tipo:', documentType, 'Para:', selectedItemForDocs);
+  // Función para manejar acciones de tablas
+  const manejarAccion = (tipo, accion, id, elemento = null) => {
+    const elementoCompleto = elemento || obtenerElementoPorId(tipo, id);
     
-    // Simular subida exitosa
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          id: Date.now(),
-          nombre: file.name,
-          tipo: documentType,
-          fecha_subida: new Date().toISOString(),
-          tamaño: file.size
-        });
-      }, 1000);
-    });
+    switch (accion) {
+      case 'ver':
+        abrirModal(`ver-${tipo}`, elementoCompleto);
+        break;
+      case 'editar':
+        abrirModal(`editar-${tipo}`, elementoCompleto);
+        break;
+      case 'documentacion':
+        abrirModal(`documentacion-${tipo}`, elementoCompleto);
+        break;
+      case 'eliminar':
+        if (window.confirm('¿Está seguro de eliminar este elemento?')) {
+          eliminarElemento(tipo, id);
+        }
+        break;
+      default:
+        console.warn('Acción no reconocida:', accion);
+    }
   };
 
-  // Eliminar documento
-  const deleteDocument = (documentId) => {
-    console.log('Eliminando documento:', documentId);
-    // Lógica para eliminar documento
+  // Obtener elemento por ID según tipo
+  const obtenerElementoPorId = (tipo, id) => {
+    switch (tipo) {
+      case 'vehiculo':
+        return vehiculos.find(v => v.id === id);
+      case 'personal':
+        return personal.find(p => p.id === id);
+      case 'sede':
+        return sedes.find(s => s.id === id);
+      case 'proveedor':
+        return proveedores.find(pr => pr.id === id);
+      default:
+        return null;
+    }
   };
 
-  // Exportar datos
-  const exportData = (data, filename) => {
-    const csvContent = convertToCSV(data);
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+  // Eliminar elemento según tipo
+  const eliminarElemento = (tipo, id) => {
+    switch (tipo) {
+      case 'vehiculo':
+        eliminarVehiculo(id);
+        break;
+      case 'personal':
+        eliminarPersonal(id);
+        break;
+      case 'sede':
+        eliminarSede(id);
+        break;
+      case 'proveedor':
+        eliminarProveedor(id);
+        break;
+      default:
+        console.warn('Tipo no reconocido para eliminar:', tipo);
+    }
   };
 
-  // Convertir datos a CSV
-  const convertToCSV = (data) => {
-    if (!data.length) return '';
-    
-    const headers = Object.keys(data[0]);
-    const csvRows = [
-      headers.join(','),
-      ...data.map(row => 
-        headers.map(header => {
-          const value = row[header];
-          return typeof value === 'string' && value.includes(',') 
-            ? `"${value}"` 
-            : value;
-        }).join(',')
-      )
-    ];
-    
-    return csvRows.join('\n');
+  // Generar botones de acciones para tablas
+  const generarBotonesAcciones = (tipo, id, elemento = null) => {
+    return (
+      <div className="action-buttons">
+        <button 
+          className="icon-btn" 
+          title="Ver"
+          onClick={() => manejarAccion(tipo, 'ver', id, elemento)}
+        >
+          👁️
+        </button>
+        <button 
+          className="icon-btn" 
+          title="Editar"
+          onClick={() => manejarAccion(tipo, 'editar', id, elemento)}
+        >
+          ✏️
+        </button>
+        <button 
+          className="icon-btn" 
+          title="Documentación"
+          onClick={() => manejarAccion(tipo, 'documentacion', id, elemento)}
+        >
+          📄
+        </button>
+        <button 
+          className="icon-btn" 
+          title="Eliminar"
+          onClick={() => manejarAccion(tipo, 'eliminar', id, elemento)}
+        >
+          🗑️
+        </button>
+      </div>
+    );
   };
 
   return {
-    documentModalOpen,
-    selectedItemForDocs,
-    openDocumentModal,
-    closeDocumentModal,
-    uploadDocument,
-    deleteDocument,
-    exportData
+    manejarAccion,
+    generarBotonesAcciones
   };
 };

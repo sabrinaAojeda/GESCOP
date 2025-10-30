@@ -1,74 +1,68 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { useApp } from '../../context/AppContext';
+import { useTableActions } from '../../hooks/useTableActions';
+import { useFiltros } from '../../hooks/useFiltros';
 
 const Proveedores = () => {
-  const [proveedores] = useState([
-    {
-      id: 1,
-      codigo: "PROV-001",
-      razonSocial: "YPF S.A.",
-      cuit: "30-12345678-9",
-      rubro: "Combustible",
-      contacto: "Carlos Rodríguez",
-      telefono: "011-4789-1234",
-      email: "crodriguez@ypf.com",
-      estado: "Activo"
-    },
-    {
-      id: 2,
-      codigo: "PROV-002",
-      razonSocial: "Neumáticos SRL",
-      cuit: "30-98765432-1",
-      rubro: "Neumáticos",
-      contacto: "Ana López",
-      telefono: "011-4123-4567",
-      email: "alopez@neumaticos.com",
-      estado: "Activo"
-    },
-    {
-      id: 3,
-      codigo: "PROV-003",
-      razonSocial: "Taller Mecánico Integral",
-      cuit: "30-45678912-3",
-      rubro: "Mantenimiento",
-      contacto: "Roberto Sánchez",
-      telefono: "011-4455-6677",
-      email: "rsanchez@tallermecanico.com",
-      estado: "Suspendido"
-    }
-  ]);
+  const { proveedores } = useApp();
+  const { generarBotonesAcciones } = useTableActions();
+
+  const columnasConfig = [
+    { key: 'codigo', label: 'Código', visible: true },
+    { key: 'razonSocial', label: 'Razón Social', visible: true },
+    { key: 'cuit', label: 'CUIT', visible: true },
+    { key: 'rubro', label: 'Rubro', visible: true },
+    { key: 'contacto', label: 'Contacto', visible: true },
+    { key: 'telefono', label: 'Teléfono', visible: true },
+    { key: 'email', label: 'Email', visible: true },
+    { key: 'estado', label: 'Estado', visible: true },
+    { key: 'direccion', label: 'Dirección', visible: false },
+    { key: 'localidad', label: 'Localidad', visible: false },
+    { key: 'provincia', label: 'Provincia', visible: false }
+  ];
+
+  const {
+    datosFiltrados,
+    filtros,
+    manejarBusqueda,
+    manejarFiltroEspecifico,
+    cantidadFiltrados,
+    cantidadTotal
+  } = useFiltros(proveedores, columnasConfig);
 
   const getEstadoClass = (estado) => {
-    switch(estado) {
-      case 'Activo': return 'status-active';
-      case 'Suspendido': return 'status-warning';
-      case 'Inactivo': return 'status-expired';
-      default: return '';
+    if (!estado) return '';
+    switch(estado.toLowerCase()) {
+      case 'activo':
+        return 'status-active';
+      case 'suspendido':
+        return 'status-warning';
+      case 'inactivo':
+        return 'status-expired';
+      default:
+        return '';
     }
-  };
-
-  const getContratosPorRenovar = () => {
-    return proveedores.filter(p => p.estado === 'Activo').length - 1;
   };
 
   return (
-    <div id="proveedores-page" className="page active">
+    <div>
       <div className="breadcrumb">
-        <Link to="/dashboard">Dashboard</Link> 
+        <a href="/dashboard">Dashboard</a>
         <span>Proveedores</span>
       </div>
 
+      {/* Resumen cards */}
       <div className="summary-cards">
         <div className="summary-card-small">
           <div className="number">{proveedores.length}</div>
           <div className="label">Proveedores Activos</div>
         </div>
         <div className="summary-card-small">
-          <div className="number">{proveedores.filter(p => p.estado === 'Activo').length}</div>
+          <div className="number">8</div>
           <div className="label">Contratos Vigentes</div>
         </div>
         <div className="summary-card-small">
-          <div className="number">{getContratosPorRenovar()}</div>
+          <div className="number">2</div>
           <div className="label">Contratos por Renovar</div>
         </div>
       </div>
@@ -77,9 +71,24 @@ const Proveedores = () => {
         <div className="section-header">
           <h2 className="section-title">🤝 Gestión de Proveedores</h2>
           <div className="table-toolbar">
-            <button className="btn btn-secondary">
-              <span>👁️</span> Columnas
-            </button>
+            <div className="column-selector">
+              <button className="btn btn-secondary">
+                <span>👁️</span> Columnas
+              </button>
+              <div className="column-selector-content">
+                {columnasConfig.map(columna => (
+                  <label key={columna.key} className="column-option">
+                    <input 
+                      type="checkbox" 
+                      checked={columna.visible} 
+                      onChange={() => {}} 
+                      disabled={columna.key === 'codigo' || columna.key === 'razonSocial'}
+                    />
+                    {columna.label}
+                  </label>
+                ))}
+              </div>
+            </div>
             <button className="btn btn-secondary">
               <span>📤</span> Exportar
             </button>
@@ -90,20 +99,32 @@ const Proveedores = () => {
         </div>
 
         <div className="filter-bar">
-          <input type="text" className="filter-select" placeholder="Buscar proveedor..." />
-          <select className="filter-select">
-            <option>Todos los rubros</option>
-            <option>Combustible</option>
-            <option>Repuestos</option>
-            <option>Mantenimiento</option>
-            <option>Seguros</option>
-            <option>Neumáticos</option>
+          <input 
+            type="text" 
+            className="filter-select" 
+            placeholder="Buscar proveedor..." 
+            value={filtros.busqueda}
+            onChange={(e) => manejarBusqueda(e.target.value)}
+          />
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('rubro', e.target.value)}
+          >
+            <option value="">Todos los rubros</option>
+            <option value="Combustible">Combustible</option>
+            <option value="Repuestos">Repuestos</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Seguros">Seguros</option>
+            <option value="Neumáticos">Neumáticos</option>
           </select>
-          <select className="filter-select">
-            <option>Todos los estados</option>
-            <option>Activo</option>
-            <option>Suspendido</option>
-            <option>Inactivo</option>
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('estado', e.target.value)}
+          >
+            <option value="">Todos los estados</option>
+            <option value="Activo">Activo</option>
+            <option value="Suspendido">Suspendido</option>
+            <option value="Inactivo">Inactivo</option>
           </select>
         </div>
 
@@ -122,7 +143,7 @@ const Proveedores = () => {
             </tr>
           </thead>
           <tbody>
-            {proveedores.map(proveedor => (
+            {datosFiltrados.map(proveedor => (
               <tr key={proveedor.id}>
                 <td>{proveedor.codigo}</td>
                 <td>{proveedor.razonSocial}</td>
@@ -137,18 +158,15 @@ const Proveedores = () => {
                   </span>
                 </td>
                 <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn" title="Ver">👁️</button>
-                    <button className="icon-btn" title="Editar">✏️</button>
-                    <button className="icon-btn" title="Documentación">📄</button>
-                    <button className="icon-btn" title="Contratos">📝</button>
-                  </div>
+                  {generarBotonesAcciones('proveedor', proveedor.id, proveedor)}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="contador">Mostrando {proveedores.length} proveedores</div>
+        <div className="contador">
+          Mostrando {cantidadFiltrados} de {cantidadTotal} proveedores
+        </div>
       </section>
     </div>
   );

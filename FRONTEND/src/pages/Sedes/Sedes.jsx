@@ -1,70 +1,69 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { useApp } from '../../context/AppContext';
+import { useTableActions } from '../../hooks/useTableActions';
+import { useFiltros } from '../../hooks/useFiltros';
 
 const Sedes = () => {
-  const [sedes] = useState([
-    {
-      id: 1,
-      codigo: "SED-001",
-      nombre: "Sede Central",
-      direccion: "Av. Principal 1234",
-      localidad: "Capital",
-      provincia: "Buenos Aires",
-      telefono: "011-4567-8901",
-      vehiculos: 8,
-      estado: "Activa"
-    },
-    {
-      id: 2,
-      codigo: "SED-002",
-      nombre: "Planta Industrial",
-      direccion: "Ruta 8 Km 45",
-      localidad: "Pilar",
-      provincia: "Buenos Aires",
-      telefono: "0230-456-789",
-      vehiculos: 15,
-      estado: "Activa"
-    },
-    {
-      id: 3,
-      codigo: "SED-003",
-      nombre: "Depósito Norte",
-      direccion: "Calle Industrial 567",
-      localidad: "Rosario",
-      provincia: "Santa Fe",
-      telefono: "0341-123-456",
-      vehiculos: 5,
-      estado: "En Trámite"
-    }
-  ]);
+  const { sedes } = useApp();
+  const { generarBotonesAcciones } = useTableActions();
+
+  const columnasConfig = [
+    { key: 'codigo', label: 'Código', visible: true },
+    { key: 'nombre', label: 'Nombre Sede', visible: true },
+    { key: 'direccion', label: 'Dirección', visible: true },
+    { key: 'localidad', label: 'Localidad', visible: true },
+    { key: 'provincia', label: 'Provincia', visible: true },
+    { key: 'telefono', label: 'Teléfono', visible: true },
+    { key: 'vehiculos', label: 'Vehículos', visible: true },
+    { key: 'estado', label: 'Estado', visible: true },
+    { key: 'contacto', label: 'Contacto', visible: false },
+    { key: 'email', label: 'Email', visible: false }
+  ];
+
+  const {
+    datosFiltrados,
+    filtros,
+    manejarBusqueda,
+    manejarFiltroEspecifico,
+    cantidadFiltrados,
+    cantidadTotal
+  } = useFiltros(sedes, columnasConfig);
 
   const getEstadoClass = (estado) => {
-    switch(estado) {
-      case 'Activa': return 'status-active';
-      case 'En Trámite': return 'status-warning';
-      case 'Inactiva': return 'status-expired';
-      default: return '';
+    if (!estado) return '';
+    switch(estado.toLowerCase()) {
+      case 'activa':
+        return 'status-active';
+      case 'en trámite':
+        return 'status-warning';
+      case 'inactiva':
+        return 'status-expired';
+      default:
+        return '';
     }
   };
 
   return (
-    <div id="sedes-page" className="page active">
+    <div>
       <div className="breadcrumb">
-        <Link to="/dashboard">Dashboard</Link> 
+        <a href="/dashboard">Dashboard</a> 
         <span>Sedes/Empresas</span>
       </div>
 
+      {/* Resumen cards */}
       <div className="summary-cards">
         <div className="summary-card-small">
           <div className="number">{sedes.length}</div>
           <div className="label">Sedes Activas</div>
         </div>
         <div className="summary-card-small">
-          <div className="number">{sedes.reduce((total, sede) => total + sede.vehiculos, 0)}</div>
+          <div className="number">
+            {sedes.reduce((total, sede) => total + (sede.vehiculos || 0), 0)}
+          </div>
           <div className="label">Vehículos Asignados</div>
         </div>
         <div className="summary-card-small">
-          <div className="number">{sedes.filter(s => s.estado === 'En Trámite').length}</div>
+          <div className="number">1</div>
           <div className="label">Permisos por Vencer</div>
         </div>
       </div>
@@ -73,9 +72,24 @@ const Sedes = () => {
         <div className="section-header">
           <h2 className="section-title">🏢 Gestión de Sedes y Empresas</h2>
           <div className="table-toolbar">
-            <button className="btn btn-secondary">
-              <span>👁️</span> Columnas
-            </button>
+            <div className="column-selector">
+              <button className="btn btn-secondary">
+                <span>👁️</span> Columnas
+              </button>
+              <div className="column-selector-content">
+                {columnasConfig.map(columna => (
+                  <label key={columna.key} className="column-option">
+                    <input 
+                      type="checkbox" 
+                      checked={columna.visible} 
+                      onChange={() => {}} 
+                      disabled={columna.key === 'codigo' || columna.key === 'nombre'}
+                    />
+                    {columna.label}
+                  </label>
+                ))}
+              </div>
+            </div>
             <button className="btn btn-secondary">
               <span>📤</span> Exportar
             </button>
@@ -86,19 +100,31 @@ const Sedes = () => {
         </div>
 
         <div className="filter-bar">
-          <input type="text" className="filter-select" placeholder="Buscar sede..." />
-          <select className="filter-select">
-            <option>Todas las provincias</option>
-            <option>Buenos Aires</option>
-            <option>Córdoba</option>
-            <option>Santa Fe</option>
-            <option>Mendoza</option>
+          <input 
+            type="text" 
+            className="filter-select" 
+            placeholder="Buscar sede..." 
+            value={filtros.busqueda}
+            onChange={(e) => manejarBusqueda(e.target.value)}
+          />
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('provincia', e.target.value)}
+          >
+            <option value="">Todas las provincias</option>
+            <option value="Buenos Aires">Buenos Aires</option>
+            <option value="Córdoba">Córdoba</option>
+            <option value="Santa Fe">Santa Fe</option>
+            <option value="Mendoza">Mendoza</option>
           </select>
-          <select className="filter-select">
-            <option>Todos los estados</option>
-            <option>Activa</option>
-            <option>Inactiva</option>
-            <option>En Trámite</option>
+          <select 
+            className="filter-select"
+            onChange={(e) => manejarFiltroEspecifico('estado', e.target.value)}
+          >
+            <option value="">Todos los estados</option>
+            <option value="Activa">Activa</option>
+            <option value="Inactiva">Inactiva</option>
+            <option value="En Trámite">En Trámite</option>
           </select>
         </div>
 
@@ -117,7 +143,7 @@ const Sedes = () => {
             </tr>
           </thead>
           <tbody>
-            {sedes.map(sede => (
+            {datosFiltrados.map(sede => (
               <tr key={sede.id}>
                 <td>{sede.codigo}</td>
                 <td>{sede.nombre}</td>
@@ -132,18 +158,15 @@ const Sedes = () => {
                   </span>
                 </td>
                 <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn" title="Ver">👁️</button>
-                    <button className="icon-btn" title="Editar">✏️</button>
-                    <button className="icon-btn" title="Documentación">📄</button>
-                    <button className="icon-btn" title="Vehículos">🚗</button>
-                  </div>
+                  {generarBotonesAcciones('sede', sede.id, sede)}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="contador">Mostrando {sedes.length} sedes</div>
+        <div className="contador">
+          Mostrando {cantidadFiltrados} de {cantidadTotal} sedes
+        </div>
       </section>
     </div>
   );
