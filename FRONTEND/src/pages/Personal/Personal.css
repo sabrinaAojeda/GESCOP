@@ -1,0 +1,139 @@
+.page-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background-color: white;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 14px;
+}
+
+.breadcrumb-link {
+  color: #2563eb;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  color: #64748b;
+}
+
+.breadcrumb-current {
+  color: #475569;
+  font-weight: 500;
+}
+
+/* Sección de datos */
+.data-section {
+  flex: 1;
+  padding: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.section-icon {
+  font-size: 20px;
+}
+
+/* Toolbar */
+.table-toolbar {
+  display: flex;
+  gap: 12px;
+}
+
+/* Botones */
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+  background-color: #e2e8f0;
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+/* Placeholder del contenido */
+.content-placeholder {
+  background: white;
+  border-radius: 8px;
+  padding: 48px;
+  text-align: center;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .table-toolbar {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .data-section {
+    padding: 16px;
+  }
+}

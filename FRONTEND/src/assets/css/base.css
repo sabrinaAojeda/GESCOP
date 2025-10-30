@@ -1,0 +1,43 @@
+:root {
+    --primary-blue: #2563eb;
+    --primary-dark: #1e40af;
+    --success-green: #10b981;
+    --warning-orange: #f59e0b;
+    --error-red: #ef4444;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-600: #4b5563;
+    --gray-900: #111827;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-900);
+    line-height: 1.5;
+}
+
+/* Estados de carga y vacío */
+.loading-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--gray-600);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray-600);
+}
+
+.empty-state p {
+    margin-bottom: 15px;
+}
