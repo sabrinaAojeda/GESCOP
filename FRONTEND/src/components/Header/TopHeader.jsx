@@ -24,7 +24,10 @@ const TopHeader = ({ user, onLogout }) => {
           <span>🔔</span>
           <div className="notification-badge">3</div>
         </div>
-        <div>👤 {user?.name || 'Administrador'}</div>
+        <div style={{display:'flex',gap:'3px'}} >
+          <span >👤</span>
+          {user?.name || 'Administrador'}
+        </div>
         <button className="btn btn-secondary" onClick={onLogout}>
           🚪 Salir
         </button>

@@ -59,6 +59,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  
 }
 
 .nav-section {
@@ -171,7 +172,7 @@ body {
 .user-actions {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 30px;
 }
 
 .notification-badge {
@@ -278,6 +279,17 @@ body {
   border-bottom: 1px solid rgba(245, 158, 11, 0.3);
 }
 
+.alert-item button {
+  background: var(--primary-blue);
+  width: 32px;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+}
+
 .alert-item:last-child {
   border-bottom: none;
 }
@@ -331,10 +343,11 @@ body {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  flex-wrap: wrap;
 }
 
 .btn {
+  height: auto;
+  width: auto;
   padding: 8px 16px;
   border: none;
   border-radius: 6px;

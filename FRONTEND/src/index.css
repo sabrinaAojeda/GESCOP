@@ -13,11 +13,11 @@
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-* {
+/* * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
+} */
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,7 +31,7 @@ body {
 }
 
 /* Estilos globales para botones */
-.btn {
+/* .btn {
   padding: 8px 16px;
   border: none;
   border-radius: var(--border-radius);
@@ -42,14 +42,14 @@ body {
   align-items: center;
   gap: 5px;
   font-size: 0.9rem;
-}
+} */
 
-.btn-primary {
+/* .btn-primary {
   background: var(--secondary);
   color: white;
-}
+} */
 
-.btn-secondary {
+/* .btn-secondary {
   background: var(--light);
   color: var(--dark);
 }
@@ -63,7 +63,7 @@ body {
 .data-table {
   width: 100%;
   border-collapse: collapse;
-}
+} */
 
 .data-table th {
   background: var(--light);
