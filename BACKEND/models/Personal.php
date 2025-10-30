@@ -4,15 +4,16 @@ class Personal {
     private $table_name = "personal";
 
     public $id;
-    public $dni;
     public $nombre;
     public $apellido;
-    public $telefono;
-    public $email;
-    public $cargo;
+    public $cui;
     public $sector;
-    public $fecha_ingreso;
-    public $estado;
+    public $seguro_vida;
+    public $habilitacion;
+    public $activo;
+    public $proveedor_id;
+    public $created_at;
+    public $updated_at;
 
     public function __construct($db) {
         $this->conn = $db;
@@ -20,27 +21,108 @@ class Personal {
 
     public function crear() {
         $query = "INSERT INTO " . $this->table_name . " 
-                 SET dni=:dni, nombre=:nombre, apellido=:apellido, telefono=:telefono, 
-                     email=:email, cargo=:cargo, sector=:sector, fecha_ingreso=:fecha_ingreso, 
-                     estado=:estado";
+                  (nombre, apellido, cui, sector, seguro_vida, habilitacion, activo, proveedor_id) 
+                  VALUES (:nombre, :apellido, :cui, :sector, :seguro_vida, :habilitacion, :activo, :proveedor_id)";
         
         $stmt = $this->conn->prepare($query);
         
-        $stmt->bindParam(":dni", $this->dni);
+        $this->nombre = htmlspecialchars(strip_tags($this->nombre));
+        $this->apellido = htmlspecialchars(strip_tags($this->apellido));
+        $this->cui = htmlspecialchars(strip_tags($this->cui));
+        $this->sector = htmlspecialchars(strip_tags($this->sector));
+        
         $stmt->bindParam(":nombre", $this->nombre);
         $stmt->bindParam(":apellido", $this->apellido);
-        $stmt->bindParam(":telefono", $this->telefono);
-        $stmt->bindParam(":email", $this->email);
-        $stmt->bindParam(":cargo", $this->cargo);
+        $stmt->bindParam(":cui", $this->cui);
         $stmt->bindParam(":sector", $this->sector);
-        $stmt->bindParam(":fecha_ingreso", $this->fecha_ingreso);
-        $stmt->bindParam(":estado", $this->estado);
+        $stmt->bindParam(":seguro_vida", $this->seguro_vida);
+        $stmt->bindParam(":habilitacion", $this->habilitacion);
+        $stmt->bindParam(":activo", $this->activo);
+        $stmt->bindParam(":proveedor_id", $this->proveedor_id);
         
-        return $stmt->execute();
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
+
+    public function leerUno() {
+        $query = "SELECT p.*, pr.nombre as proveedor_nombre 
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN proveedores pr ON p.proveedor_id = pr.id
+                  WHERE p.id = ? LIMIT 0,1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $this->id);
+        $stmt->execute();
+        
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($row) {
+            $this->nombre = $row['nombre'];
+            $this->apellido = $row['apellido'];
+            $this->cui = $row['cui'];
+            $this->sector = $row['sector'];
+            $this->seguro_vida = $row['seguro_vida'];
+            $this->habilitacion = $row['habilitacion'];
+            $this->activo = $row['activo'];
+            $this->proveedor_id = $row['proveedor_id'];
+            $this->created_at = $row['created_at'];
+            $this->updated_at = $row['updated_at'];
+            return true;
+        }
+        return false;
+    }
+
+    public function actualizar() {
+        $query = "UPDATE " . $this->table_name . " 
+                  SET nombre = :nombre, apellido = :apellido, cui = :cui, 
+                      sector = :sector, seguro_vida = :seguro_vida, 
+                      habilitacion = :habilitacion, activo = :activo,
+                      proveedor_id = :proveedor_id, updated_at = CURRENT_TIMESTAMP 
+                  WHERE id = :id";
+        
+        $stmt = $this->conn->prepare($query);
+        
+        $this->nombre = htmlspecialchars(strip_tags($this->nombre));
+        $this->apellido = htmlspecialchars(strip_tags($this->apellido));
+        $this->cui = htmlspecialchars(strip_tags($this->cui));
+        $this->sector = htmlspecialchars(strip_tags($this->sector));
+        $this->id = htmlspecialchars(strip_tags($this->id));
+        
+        $stmt->bindParam(":nombre", $this->nombre);
+        $stmt->bindParam(":apellido", $this->apellido);
+        $stmt->bindParam(":cui", $this->cui);
+        $stmt->bindParam(":sector", $this->sector);
+        $stmt->bindParam(":seguro_vida", $this->seguro_vida);
+        $stmt->bindParam(":habilitacion", $this->habilitacion);
+        $stmt->bindParam(":activo", $this->activo);
+        $stmt->bindParam(":proveedor_id", $this->proveedor_id);
+        $stmt->bindParam(":id", $this->id);
+        
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
+
+    public function obtenerPorProveedor($proveedor_id) {
+        $query = "SELECT p.*, pr.nombre as proveedor_nombre 
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN proveedores pr ON p.proveedor_id = pr.id
+                  WHERE p.proveedor_id = ? AND p.activo = 1 
+                  ORDER BY p.nombre, p.apellido";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $proveedor_id);
+        $stmt->execute();
+        return $stmt;
     }
 
     public function leer() {
-        $query = "SELECT * FROM " . $this->table_name . " ORDER BY apellido, nombre";
+        $query = "SELECT p.*, pr.nombre as proveedor_nombre 
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN proveedores pr ON p.proveedor_id = pr.id
+                  WHERE p.activo = 1 
+                  ORDER BY p.nombre, p.apellido";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;

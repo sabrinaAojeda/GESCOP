@@ -1,94 +1,146 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, PUT");
-header("Access-Control-Max-Age: 3600");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+header('Access-Control-Allow-Methods: GET');
+header('Access-Control-Allow-Headers: Access-Control-Allow-Headers,Content-Type,Access-Control-Allow-Methods, Authorization, X-Requested-With');
 
-include_once '../../config/database.php';
-include_once '../../models/Alerta.php';
+require_once '../config/conexion.php';
+require_once '../models/Habilitacion.php';
+require_once '../models/Servicio.php';
 
-$database = new Database();
-$db = $database->getConnection();
-$alerta = new Alerta($db);
+class AlertasController {
+    private $conn;
+    private $habilitacion;
+    private $servicio;
 
+    public function __construct() {
+        $this->conn = Conexion::getConexion();
+        $this->habilitacion = new Habilitacion($this->conn);
+        $this->servicio = new Servicio($this->conn);
+    }
+
+    // GET /alertas - Obtener todas las alertas
+    public function obtenerAlertas() {
+        try {
+            $alertas = array();
+            
+            // 1. Alertas de habilitaciones próximas a vencer
+            $stmtHabilitaciones = $this->habilitacion->obtenerProximasAVencer(30);
+            $habilitaciones = $stmtHabilitaciones->fetchAll(PDO::FETCH_ASSOC);
+            
+            foreach ($habilitaciones as $hab) {
+                $dias_restantes = $this->calcularDiasRestantes($hab['fecha_vencimiento']);
+                $alertas[] = array(
+                    'id' => 'hab_' . $hab['id'],
+                    'tipo' => 'habilitacion',
+                    'titulo' => 'Habilitación próxima a vencer',
+                    'mensaje' => "La habilitación {$hab['tipo']} de {$hab['entidad_nombre']} vence en {$dias_restantes} días",
+                    'entidad_tipo' => $hab['entidad_tipo'],
+                    'entidad_id' => $hab['entidad_id'],
+                    'entidad_nombre' => $hab['entidad_nombre'],
+                    'fecha_vencimiento' => $hab['fecha_vencimiento'],
+                    'dias_restantes' => $dias_restantes,
+                    'prioridad' => $dias_restantes <= 7 ? 'alta' : ($dias_restantes <= 15 ? 'media' : 'baja'),
+                    'fecha_creacion' => date('Y-m-d H:i:s')
+                );
+            }
+            
+            // 2. Alertas de servicios próximos a vencer
+            $serviciosProximos = $this->obtenerServiciosProximosAVencer(30);
+            foreach ($serviciosProximos as $serv) {
+                $dias_restantes = $this->calcularDiasRestantes($serv['fecha_vencimiento']);
+                $alertas[] = array(
+                    'id' => 'serv_' . $serv['id'],
+                    'tipo' => 'servicio',
+                    'titulo' => 'Servicio próximo a vencer',
+                    'mensaje' => "El servicio {$serv['nombre_servicio']} en {$serv['sede_nombre']} vence en {$dias_restantes} días",
+                    'entidad_tipo' => 'servicio',
+                    'entidad_id' => $serv['id'],
+                    'entidad_nombre' => $serv['nombre_servicio'],
+                    'fecha_vencimiento' => $serv['fecha_vencimiento'],
+                    'dias_restantes' => $dias_restantes,
+                    'prioridad' => $dias_restantes <= 7 ? 'alta' : ($dias_restantes <= 15 ? 'media' : 'baja'),
+                    'fecha_creacion' => date('Y-m-d H:i:s')
+                );
+            }
+            
+            // 3. Alertas de empresas sin sedes
+            $empresasSinSedes = $this->obtenerEmpresasSinSedes();
+            foreach ($empresasSinSedes as $empresa) {
+                $alertas[] = array(
+                    'id' => 'emp_' . $empresa['id'],
+                    'tipo' => 'empresa',
+                    'titulo' => 'Empresa sin sedes',
+                    'mensaje' => "La empresa {$empresa['nombre']} no tiene sedes registradas",
+                    'entidad_tipo' => 'empresa',
+                    'entidad_id' => $empresa['id'],
+                    'entidad_nombre' => $empresa['nombre'],
+                    'prioridad' => 'media',
+                    'fecha_creacion' => date('Y-m-d H:i:s')
+                );
+            }
+            
+            // Ordenar alertas por prioridad (alta, media, baja)
+            usort($alertas, function($a, $b) {
+                $prioridades = ['alta' => 3, 'media' => 2, 'baja' => 1];
+                return $prioridades[$b['prioridad']] - $prioridades[$a['prioridad']];
+            });
+
+            echo json_encode(array(
+                "alertas" => $alertas,
+                "total" => count($alertas),
+                "resumen" => [
+                    "alta" => count(array_filter($alertas, function($a) { return $a['prioridad'] === 'alta'; })),
+                    "media" => count(array_filter($alertas, function($a) { return $a['prioridad'] === 'media'; })),
+                    "baja" => count(array_filter($alertas, function($a) { return $a['prioridad'] === 'baja'; }))
+                ]
+            ));
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(array("mensaje" => "Error: " . $e->getMessage()));
+        }
+    }
+
+    private function calcularDiasRestantes($fecha_vencimiento) {
+        $fecha_vencimiento = new DateTime($fecha_vencimiento);
+        $fecha_actual = new DateTime();
+        $diferencia = $fecha_actual->diff($fecha_vencimiento);
+        return $diferencia->invert ? 0 : $diferencia->days;
+    }
+
+    private function obtenerServiciosProximosAVencer($dias = 30) {
+        $query = "SELECT s.*, se.nombre as sede_nombre 
+                  FROM servicios s 
+                  LEFT JOIN sedes se ON s.base_id = se.id 
+                  WHERE s.fecha_vencimiento BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL ? DAY)
+                  AND s.estado = 'activo'";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $dias);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function obtenerEmpresasSinSedes() {
+        $query = "SELECT e.* 
+                  FROM empresas e 
+                  LEFT JOIN sedes s ON e.id = s.empresa_id AND s.activo = 1 
+                  WHERE e.activo = 1 
+                  AND s.id IS NULL";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+}
+
+// Routing
 $method = $_SERVER['REQUEST_METHOD'];
+$controller = new AlertasController();
 
-switch($method) {
-    case 'GET':
-        $tipo = $_GET['tipo'] ?? 'todas';
-        
-        if($tipo === 'pendientes') {
-            $stmt = $alerta->leerPendientes();
-        } else {
-            $stmt = $alerta->leer();
-        }
-        
-        $num = $stmt->rowCount();
-        
-        if($num > 0) {
-            $alertas_arr = array();
-            $alertas_arr["alertas"] = array();
-            
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                array_push($alertas_arr["alertas"], $row);
-            }
-            
-            http_response_code(200);
-            echo json_encode($alertas_arr);
-        } else {
-            http_response_code(404);
-            echo json_encode(array("message" => "No se encontraron alertas"));
-        }
-        break;
-
-    case 'POST':
-        $data = json_decode(file_get_contents("php://input"));
-        
-        if(!empty($data->tipo) && !empty($data->mensaje)) {
-            $alerta->tipo = $data->tipo;
-            $alerta->mensaje = $data->mensaje;
-            $alerta->vehiculo_id = $data->vehiculo_id;
-            $alerta->estado = 'pendiente';
-            
-            if($alerta->crear()) {
-                http_response_code(201);
-                echo json_encode(array("message" => "Alerta creada exitosamente"));
-            } else {
-                http_response_code(503);
-                echo json_encode(array("message" => "No se pudo crear la alerta"));
-            }
-        } else {
-            http_response_code(400);
-            echo json_encode(array("message" => "Datos incompletos"));
-        }
-        break;
-
-    case 'PUT':
-        $data = json_decode(file_get_contents("php://input"));
-        
-        if(!empty($data->id)) {
-            // Marcar alerta como vista
-            $query = "UPDATE alertas SET estado = 'vista', fecha_vista = NOW() WHERE id = ?";
-            $stmt = $db->prepare($query);
-            $stmt->bindParam(1, $data->id);
-            
-            if($stmt->execute()) {
-                http_response_code(200);
-                echo json_encode(array("message" => "Alerta marcada como vista"));
-            } else {
-                http_response_code(503);
-                echo json_encode(array("message" => "No se pudo actualizar la alerta"));
-            }
-        } else {
-            http_response_code(400);
-            echo json_encode(array("message" => "ID requerido"));
-        }
-        break;
-
-    default:
-        http_response_code(405);
-        echo json_encode(array("message" => "Método no permitido"));
-        break;
+if ($method == 'GET') {
+    $controller->obtenerAlertas();
+} else {
+    http_response_code(405);
+    echo json_encode(array("mensaje" => "Método no permitido"));
 }
 ?>
