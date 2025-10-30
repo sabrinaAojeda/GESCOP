@@ -42,34 +42,34 @@ function App() {
     return <div className="loading">Cargando...</div>;
   }
 
-return (
-  <div className="App">
-    {user ? (
-      <div className="app-container">
-        <Sidebar onLogout={handleLogout} currentUser={user} />
-        <div className="main-content">
-          <TopHeader user={user} onLogout={handleLogout} />
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/flota/rodado-maquinarias" element={<RodadoMaquinarias />} />
-            <Route path="/flota/listado-vehiculos" element={<ListadoVehiculos />} />
-            <Route path="/flota/vehiculos-vendidos" element={<VehiculosVendidos />} />
-            <Route path="/flota/equipamiento" element={<EquipamientoVehiculos />} />
-            <Route path="/personal" element={<Personal />} />
-            <Route path="/sedes" element={<Sedes />} />
-            <Route path="/proveedores" element={<Proveedores />} />
-            <Route path="/reportes" element={<Reportes />} />
-            <Route path="/alertas" element={<Alertas />} />
-            <Route path="/configuracion" element={<Configuracion />} />
-          </Routes>
+  return (
+    <div className="App">
+      {user ? (
+        <div className="app-container">
+          <Sidebar onLogout={handleLogout} currentUser={user} />
+          <div className="main-content">
+            <TopHeader user={user} onLogout={handleLogout} />
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/flota/rodado-maquinarias" element={<RodadoMaquinarias />} />
+              <Route path="/flota/listado-vehiculos" element={<ListadoVehiculos />} />
+              <Route path="/flota/vehiculos-vendidos" element={<VehiculosVendidos />} />
+              <Route path="/flota/equipamiento" element={<EquipamientoVehiculos />} />
+              <Route path="/personal" element={<Personal />} />
+              <Route path="/sedes" element={<Sedes />} />
+              <Route path="/proveedores" element={<Proveedores />} />
+              <Route path="/reportes" element={<Reportes />} />
+              <Route path="/alertas" element={<Alertas />} />
+              <Route path="/configuracion" element={<Configuracion />} />
+            </Routes>
+          </div>
         </div>
-      </div>
-    ) : (
-      <Login onLogin={handleLogin} />
-    )}
-  </div>
-);
+      ) : (
+        <Login onLogin={handleLogin} />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
