@@ -5,7 +5,7 @@ import { useFiltros } from '../../hooks/useFiltros';
 
 const Personal = () => {
   const { personal } = useApp();
-  const { generarBotonesAcciones } = useTableActions();
+  const { generarBotonesAcciones , manejarAccion} = useTableActions();
 
   const columnasConfig = [
     { key: 'legajo', label: 'Legajo', visible: true },
@@ -176,7 +176,7 @@ const Personal = () => {
                 </td>
                 <td>{formatearFecha(persona.licenciaVencimiento)}</td>
                 <td>
-                  {generarBotonesAcciones('personal', persona.id, persona)}
+                  {generarBotonesAcciones('personal', persona.id, persona, manejarAccion)}
                 </td>
               </tr>
             ))}

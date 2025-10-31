@@ -1,4 +1,5 @@
 import { useApp } from '../context/AppContext';
+import React from 'react';
 
 export const useTableActions = () => {
   const { 
@@ -73,41 +74,54 @@ export const useTableActions = () => {
     }
   };
 
-  // Generar botones de acciones para tablas
-  const generarBotonesAcciones = (tipo, id, elemento = null) => {
-    return (
-      <div className="action-buttons">
-        <button 
-          className="icon-btn" 
-          title="Ver"
-          onClick={() => manejarAccion(tipo, 'ver', id, elemento)}
-        >
-          👁️
-        </button>
-        <button 
-          className="icon-btn" 
-          title="Editar"
-          onClick={() => manejarAccion(tipo, 'editar', id, elemento)}
-        >
-          ✏️
-        </button>
-        <button 
-          className="icon-btn" 
-          title="Documentación"
-          onClick={() => manejarAccion(tipo, 'documentacion', id, elemento)}
-        >
-          📄
-        </button>
-        <button 
-          className="icon-btn" 
-          title="Eliminar"
-          onClick={() => manejarAccion(tipo, 'eliminar', id, elemento)}
-        >
-          🗑️
-        </button>
-      </div>
-    );
-  };
+  const generarBotonesAcciones = (tipo, id, elemento = null, manejarAccion) => {
+  return React.createElement(
+    'div',
+    { className: 'action-buttons' },
+    [
+      React.createElement(
+        'button',
+        {
+          key: 'ver',
+          className: 'icon-btn',
+          title: 'Ver',
+          onClick: () => manejarAccion(tipo, 'ver', id, elemento)
+        },
+        React.createElement('span', null, '👁️')
+      ),
+      React.createElement(
+        'button',
+        {
+          key: 'editar',
+          className: 'icon-btn',
+          title: 'Editar',
+          onClick: () => manejarAccion(tipo, 'editar', id, elemento)
+        },
+        '✏️'
+      ),
+      React.createElement(
+        'button',
+        {
+          key: 'documentacion',
+          className: 'icon-btn',
+          title: 'Documentación',
+          onClick: () => manejarAccion(tipo, 'documentacion', id, elemento)
+        },
+        '📄'
+      ),
+      React.createElement(
+        'button',
+        {
+          key: 'eliminar',
+          className: 'icon-btn',
+          title: 'Eliminar',
+          onClick: () => manejarAccion(tipo, 'eliminar', id, elemento)
+        },
+        '🗑️'
+      )
+    ]
+  );
+};
 
   return {
     manejarAccion,

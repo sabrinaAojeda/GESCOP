@@ -5,7 +5,7 @@ import { useFiltros } from '../../../hooks/useFiltros';
 
 const ListadoVehiculos = () => {
   const { vehiculos } = useApp();
-  const { generarBotonesAcciones } = useTableActions();
+  const { generarBotonesAcciones, manejarAccion } = useTableActions();
 
   const columnasConfig = [
     { key: 'interno', label: 'Interno', visible: true },
@@ -157,7 +157,7 @@ const ListadoVehiculos = () => {
                 <td>{formatearFecha(vehiculo.vtvVencimiento)}</td>
                 <td>{formatearFecha(vehiculo.habilitacionVencimiento)}</td>
                 <td>
-                  {generarBotonesAcciones('vehiculo', vehiculo.id, vehiculo)}
+                  {generarBotonesAcciones('vehiculo', vehiculo.id, vehiculo, manejarAccion)}
                 </td>
               </tr>
             ))}

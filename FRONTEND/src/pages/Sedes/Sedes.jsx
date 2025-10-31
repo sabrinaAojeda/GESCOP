@@ -5,7 +5,7 @@ import { useFiltros } from '../../hooks/useFiltros';
 
 const Sedes = () => {
   const { sedes } = useApp();
-  const { generarBotonesAcciones } = useTableActions();
+  const { generarBotonesAcciones, manejarAccion } = useTableActions();
 
   const columnasConfig = [
     { key: 'codigo', label: 'Código', visible: true },
@@ -158,7 +158,7 @@ const Sedes = () => {
                   </span>
                 </td>
                 <td>
-                  {generarBotonesAcciones('sede', sede.id, sede)}
+                  {generarBotonesAcciones('sede', sede.id, sede, manejarAccion)}
                 </td>
               </tr>
             ))}

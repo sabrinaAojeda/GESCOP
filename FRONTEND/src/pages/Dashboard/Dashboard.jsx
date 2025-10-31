@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { useTableActions } from '../../hooks/useTableActions';
 const Dashboard = () => {
   const navigate = useNavigate();
+
+  const { manejarAccion, generarBotonesAcciones } = useTableActions();
 
   const handleCardClick = (page) => {
     navigate(page);

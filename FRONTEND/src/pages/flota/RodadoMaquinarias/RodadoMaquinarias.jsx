@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTableActions } from '../../../hooks/useTableActions';
 
 const RodadoMaquinarias = () => {
+  const { manejarAccion , generarBotonesAcciones} = useTableActions();
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -171,12 +173,7 @@ const RodadoMaquinarias = () => {
                 </td>
                 <td>{vehicle.observaciones || '-'}</td>
                 <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn" title="Ver">👁️</button>
-                    <button className="icon-btn" title="Editar">✏️</button>
-                    <button className="icon-btn" title="Documentación">📄</button>
-                    <button className="icon-btn" title="Eliminar">🗑️</button>
-                  </div>
+                  {generarBotonesAcciones('vehiculo', vehicle.id, vehicle, manejarAccion)}
                 </td>
               </tr>
             ))}

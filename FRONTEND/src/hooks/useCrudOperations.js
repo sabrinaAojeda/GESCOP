@@ -1,5 +1,5 @@
 // FRONTEND/src/hooks/useCrudOperations.js
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export const useCrudOperations = (initialData = []) => {
   const [data, setData] = useState(initialData);

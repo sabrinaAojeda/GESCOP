@@ -5,7 +5,7 @@ import { useFiltros } from '../../hooks/useFiltros';
 
 const Proveedores = () => {
   const { proveedores } = useApp();
-  const { generarBotonesAcciones } = useTableActions();
+  const { generarBotonesAcciones, manejarAccion } = useTableActions();
 
   const columnasConfig = [
     { key: 'codigo', label: 'Código', visible: true },
@@ -158,7 +158,7 @@ const Proveedores = () => {
                   </span>
                 </td>
                 <td>
-                  {generarBotonesAcciones('proveedor', proveedor.id, proveedor)}
+                  {generarBotonesAcciones('proveedor', proveedor.id, proveedor, manejarAccion)}
                 </td>
               </tr>
             ))}
