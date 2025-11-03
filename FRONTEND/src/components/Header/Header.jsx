@@ -1,36 +1,44 @@
-import React from 'react'
-import { useLocation } from 'react-router-dom'
-import TopHeader from './TopHeader'
-import './Header.css'
+import React from 'react';
+import { useAuth } from '../../context/AuthContext';
+import './Header.css';
 
 const Header = () => {
-  const location = useLocation()
+  const { user, logout } = useAuth();
 
-  const getPageTitle = () => {
-    const routes = {
-      '/': 'Dashboard',
-      '/rodado-maquinarias': 'Rodado y Maquinarias',
-      '/listado-vehiculos': 'Listado de Vehículos',
-      '/vehiculos-vendidos': 'Vehículos Vendidos',
-      '/equipamiento-vehiculos': 'Equipamiento',
-      '/personal': 'Personal',
-      '/sedes': 'Sedes/Empresas',
-      '/proveedores': 'Proveedores',
-      '/reportes': 'Reportes',
-      '/alertas': 'Alertas',
-      '/configuracion': 'Configuración'
+  const handleLogout = () => {
+    if (window.confirm('¿Está seguro que desea cerrar sesión?')) {
+      logout();
     }
-    return routes[location.pathname] || 'Dashboard'
-  }
+  };
 
   return (
-    <header className="header">
-      <div className="header-content">
-        <h1 className="page-title">{getPageTitle()}</h1>
-        <TopHeader />
+    <header className="top-header">
+      <div className="search-bar">
+        <span>🔍</span>
+        <input 
+          type="text" 
+          placeholder="Buscar documentos, vehículos, personas..." 
+        />
+      </div>
+
+      <div className="user-actions">
+        <div className="notification-icon">
+          <span>🔔</span>
+          <div className="notification-badge">3</div>
+        </div>
+        <div className="user-info">
+          <span>👤</span>
+          {user?.name}
+        </div>
+        <button 
+          className="btn-logout"
+          onClick={handleLogout}
+        >
+          🚪 Salir
+        </button>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

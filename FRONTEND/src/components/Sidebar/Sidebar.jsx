@@ -1,75 +1,119 @@
-import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import './Sidebar.css'
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import './Sidebar.css';
 
 const Sidebar = () => {
-  const [flotaExpanded, setFlotaExpanded] = useState(false)
-  const location = useLocation()
+  const [flotaExpanded, setFlotaExpanded] = useState(false);
+  const location = useLocation();
 
   const isActive = (path) => {
-    return location.pathname === path || location.pathname.includes(path)
-  }
+    return location.pathname === path;
+  };
+
+  const isFlotaActive = () => {
+    return location.pathname.includes('/flota');
+  };
 
   return (
     <nav className="sidebar">
       <div className="logo">
         <span>📊</span>
-        GesDoc Pro
+        GESCOP
       </div>
 
       <div className="nav-section">
-        <div className="nav-title">Navegación Principal</div>
-        <Link to="/" className={`nav-item ${isActive('/') && 'active'}`}>
+        <div className="nav-title">NAVEGACIÓN PRINCIPAL</div>
+        
+        <Link 
+          to="/dashboard" 
+          className={`nav-item ${isActive('/dashboard') ? 'active' : ''}`}
+        >
           <span>🏠</span> Dashboard
         </Link>
-        
+
+        {/* Flota Vehicular con submenú */}
         <div 
-          className={`nav-item has-submenu ${flotaExpanded ? 'expanded' : ''}`}
+          className={`nav-item has-submenu ${isFlotaActive() ? 'active' : ''} ${flotaExpanded ? 'expanded' : ''}`}
           onClick={() => setFlotaExpanded(!flotaExpanded)}
         >
           <span>🚗</span> Flota Vehicular
         </div>
         
         <div className={`submenu ${flotaExpanded ? 'expanded' : ''}`}>
-          <Link to="/rodado-maquinarias" className={`submenu-item ${isActive('rodado-maquinarias') && 'active'}`}>
+          <Link 
+            to="/flota/rodado-maquinarias" 
+            className={`submenu-item ${isActive('/flota/rodado-maquinarias') ? 'active' : ''}`}
+          >
             <span>🚛</span> Rodado y Maquinarias
           </Link>
-          <Link to="/listado-vehiculos" className={`submenu-item ${isActive('listado-vehiculos') && 'active'}`}>
+          <Link 
+            to="/flota/listado-vehiculos" 
+            className={`submenu-item ${isActive('/flota/listado-vehiculos') ? 'active' : ''}`}
+          >
             <span>📋</span> Listado de Vehículos
           </Link>
-          <Link to="/vehiculos-vendidos" className={`submenu-item ${isActive('vehiculos-vendidos') && 'active'}`}>
+          <Link 
+            to="/flota/vehiculos-vendidos" 
+            className={`submenu-item ${isActive('/flota/vehiculos-vendidos') ? 'active' : ''}`}
+          >
             <span>💰</span> Vehículos Vendidos
           </Link>
-          <Link to="/equipamiento-vehiculos" className={`submenu-item ${isActive('equipamiento-vehiculos') && 'active'}`}>
+          <Link 
+            to="/flota/equipamiento-vehiculos" 
+            className={`submenu-item ${isActive('/flota/equipamiento-vehiculos') ? 'active' : ''}`}
+          >
             <span>🔧</span> Equipamiento
           </Link>
         </div>
-        
-        <Link to="/personal" className={`nav-item ${isActive('personal') && 'active'}`}>
+
+        <Link 
+          to="/personal" 
+          className={`nav-item ${isActive('/personal') ? 'active' : ''}`}
+        >
           <span>👥</span> Personal
         </Link>
-        <Link to="/sedes" className={`nav-item ${isActive('sedes') && 'active'}`}>
+
+        <Link 
+          to="/sedes" 
+          className={`nav-item ${isActive('/sedes') ? 'active' : ''}`}
+        >
           <span>🏢</span> Sedes/Empresas
         </Link>
-        <Link to="/proveedores" className={`nav-item ${isActive('proveedores') && 'active'}`}>
+
+        <Link 
+          to="/proveedores" 
+          className={`nav-item ${isActive('/proveedores') ? 'active' : ''}`}
+        >
           <span>🤝</span> Proveedores
         </Link>
       </div>
 
       <div className="nav-section">
-        <div className="nav-title">Herramientas</div>
-        <Link to="/reportes" className={`nav-item ${isActive('reportes') && 'active'}`}>
+        <div className="nav-title">HERRAMIENTAS</div>
+        
+        <Link 
+          to="/reportes" 
+          className={`nav-item ${isActive('/reportes') ? 'active' : ''}`}
+        >
           <span>📈</span> Reportes
         </Link>
-        <Link to="/alertas" className={`nav-item ${isActive('alertas') && 'active'}`}>
+
+        <Link 
+          to="/alertas" 
+          className={`nav-item ${isActive('/alertas') ? 'active' : ''}`}
+        >
           <span>🔔</span> Alertas
         </Link>
-        <Link to="/configuracion" className={`nav-item ${isActive('configuracion') && 'active'}`}>
+
+        <Link 
+          to="/configuracion" 
+          className={`nav-item ${isActive('/configuracion') ? 'active' : ''}`}
+        >
           <span>⚙️</span> Configuración
         </Link>
       </div>
     </nav>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

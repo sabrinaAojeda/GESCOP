@@ -1,10 +1,12 @@
-.login-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+:root {
+  --primary-blue: #2563eb;
+  --primary-dark: #1e40af;
+  --success-green: #10b981;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-600: #4b5563;
+  --gray-900: #111827;
 }
 
 .login-container {
@@ -17,7 +19,7 @@
 }
 
 .login-header {
-  background: #2563eb;
+  background: var(--primary-blue);
   color: white;
   padding: 30px;
   text-align: center;
@@ -50,13 +52,13 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #4b5563;
+  color: var(--gray-600);
 }
 
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--gray-200);
   border-radius: 8px;
   font-size: 16px;
   transition: all 0.3s;
@@ -64,7 +66,7 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: var(--primary-blue);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -77,39 +79,45 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: var(--primary-blue);
   color: white;
 }
 
-.btn-primary:hover {
-  background: #1e40af;
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
   transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .login-footer {
   text-align: center;
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--gray-200);
 }
 
 .footer-text {
-  color: #4b5563;
+  color: var(--gray-600);
   font-size: 14px;
-}
-
-.footer-text.small {
-  font-size: 12px;
-  margin-top: 8px;
 }
 
 .alert {
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 20px;
+  display: block;
 }
 
 .alert-error {
@@ -128,7 +136,7 @@
   flex: 1;
   text-align: center;
   padding: 15px 10px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--gray-200);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
@@ -136,24 +144,27 @@
 }
 
 .role-option.selected {
-  border-color: #2563eb;
+  border-color: var(--primary-blue);
   background: #eff6ff;
   font-weight: 500;
 }
 
 .loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
   text-align: center;
-  padding: 20px;
 }
 
 .spinner {
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #2563eb;
+  border-top: 3px solid var(--primary-blue);
   border-radius: 50%;
   width: 20px;
   height: 20px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 10px auto;
 }
 
 @keyframes spin {

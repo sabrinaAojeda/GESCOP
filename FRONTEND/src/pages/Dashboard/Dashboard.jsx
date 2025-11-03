@@ -1,52 +1,17 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
-import './Dashboard.css'
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Dashboard.css';
 
 const Dashboard = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const summaryCards = [
-    {
-      title: 'Flota Vehicular',
-      icon: '🚗',
-      number: '47',
-      label: 'vehículos',
-      alert: '5 vencimientos',
-      color: 'flota',
-      page: 'rodado-maquinarias'
-    },
-    {
-      title: 'Personal',
-      icon: '👥',
-      number: '24',
-      label: 'personas',
-      alert: '3 certificados por vencer',
-      color: 'personal',
-      page: 'personal'
-    },
-    {
-      title: 'Sedes/Empresas',
-      icon: '🏢',
-      number: '5',
-      label: 'sedes',
-      alert: '1 permiso vencido',
-      color: 'sedes',
-      page: 'sedes'
-    },
-    {
-      title: 'Proveedores',
-      icon: '🤝',
-      number: '12',
-      label: 'proveedores',
-      alert: '2 contratos por renovar',
-      color: 'proveedores',
-      page: 'proveedores'
-    }
-  ]
+  const handleCardClick = (path) => {
+    navigate(path);
+  };
 
   return (
     <div className="dashboard-page">
-      {/* Alert Panel */}
+      {/* Alertas de Vencimiento */}
       <div className="alert-panel">
         <div className="alert-header">
           <span>⚠️</span>
@@ -54,37 +19,79 @@ const Dashboard = () => {
         </div>
         <div className="alert-item">
           <span>Seguro del vehículo AB-123-CD vence en 3 días</span>
-          <button className="btn btn-primary small">Ver</button>
+          <button className="btn-ver">Ver</button>
         </div>
         <div className="alert-item">
           <span>Certificado de Juan Pérez vence en 7 días</span>
-          <button className="btn btn-primary small">Ver</button>
+          <button className="btn-ver">Ver</button>
         </div>
       </div>
 
-      {/* Dashboard Summary */}
-      <section className="dashboard-grid">
-        {summaryCards.map((card, index) => (
-          <div 
-            key={index}
-            className={`summary-card ${card.color}`}
-            onClick={() => navigate(`/${card.page}`)}
-          >
-            <div className="card-header">
-              <span className="card-icon">{card.icon}</span>
-              <h3>{card.title}</h3>
-            </div>
-            <div className="card-stats">
-              <span className="card-number">{card.number}</span>
-              <span className="card-label">{card.label}</span>
-            </div>
-            <div className="card-alert">{card.alert}</div>
+      {/* Resumen General */}
+      <div className="dashboard-grid">
+        <div 
+          className="summary-card flota" 
+          onClick={() => handleCardClick('/flota/rodado-maquinarias')}
+        >
+          <div className="card-header">
+            <span className="card-icon">🚗</span>
+            <h3>Flota Vehicular</h3>
           </div>
-        ))}
-      </section>
+          <div className="card-stats">
+            <span className="card-number">47</span>
+            <span className="card-label">vehículos</span>
+          </div>
+          <div className="card-alert">5 vencimientos</div>
+        </div>
 
-      {/* Vencimientos Recientes Section */}
-      <section className="data-section">
+        <div 
+          className="summary-card personal" 
+          onClick={() => handleCardClick('/personal')}
+        >
+          <div className="card-header">
+            <span className="card-icon">👥</span>
+            <h3>Personal</h3>
+          </div>
+          <div className="card-stats">
+            <span className="card-number">24</span>
+            <span className="card-label">personas</span>
+          </div>
+          <div className="card-alert">3 certificados por vencer</div>
+        </div>
+
+        <div 
+          className="summary-card sedes" 
+          onClick={() => handleCardClick('/sedes')}
+        >
+          <div className="card-header">
+            <span className="card-icon">🏢</span>
+            <h3>Sedes/Empresas</h3>
+          </div>
+          <div className="card-stats">
+            <span className="card-number">5</span>
+            <span className="card-label">sedes</span>
+          </div>
+          <div className="card-alert">1 permiso vencido</div>
+        </div>
+
+        <div 
+          className="summary-card proveedores" 
+          onClick={() => handleCardClick('/proveedores')}
+        >
+          <div className="card-header">
+            <span className="card-icon">🤝</span>
+            <h3>Proveedores</h3>
+          </div>
+          <div className="card-stats">
+            <span className="card-number">12</span>
+            <span className="card-label">proveedores</span>
+          </div>
+          <div className="card-alert">2 contratos por renovar</div>
+        </div>
+      </div>
+
+      {/* Vencimientos Próximos */}
+      <div className="data-section">
         <div className="section-header">
           <h2 className="section-title">📋 Vencimientos Próximos</h2>
           <div className="table-toolbar">
@@ -147,9 +154,9 @@ const Dashboard = () => {
             </tr>
           </tbody>
         </table>
-      </section>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

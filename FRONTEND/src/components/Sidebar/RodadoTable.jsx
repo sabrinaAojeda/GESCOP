@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useApp } from '../../context/AppContext'
-import './RodedoTable.css'
+import './RodadoTable.css'
 
-const RodedoTable = ({ onVerVehiculo }) => {
+const RodadoTable = ({ onVerVehiculo }) => {
   const { vehiculos, columnasVisibles } = useApp()
   const [filtros, setFiltros] = useState({
     buscar: '',
@@ -67,7 +67,7 @@ const RodedoTable = ({ onVerVehiculo }) => {
   }
 
   return (
-    <div className="rodedo-table-container">
+    <div className="rodado-table-container">
       <div className="filter-bar">
         <input 
           type="text" 
@@ -196,4 +196,4 @@ const RodedoTable = ({ onVerVehiculo }) => {
   )
 }
 
-export default RodedoTable
+export default RodadoTable

@@ -1,18 +1,50 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import './Reportes.css'
+import React from 'react';
+import './Reportes.css';
 
 const Reportes = () => {
+  const reportes = [
+    {
+      nombre: 'Reporte Flota - Marzo 2024',
+      tipo: 'Vehículos',
+      periodo: 'Mensual',
+      fechaGeneracion: '01/04/2024',
+      generadoPor: 'Admin',
+      tamaño: '2.5 MB'
+    },
+    {
+      nombre: 'Consumo Combustible - Q1 2024',
+      tipo: 'Combustible',
+      periodo: 'Trimestral',
+      fechaGeneracion: '05/04/2024',
+      generadoPor: 'Admin',
+      tamaño: '1.8 MB'
+    }
+  ];
+
   return (
     <div className="reportes-page">
-      <div className="breadcrumb">
-        <Link to="/">Dashboard</Link>
-        <span>Reportes</span>
+      <div className="page-header">
+        <h1>📈 Reportes y Estadísticas</h1>
       </div>
 
-      <section className="data-section">
+      <div className="reportes-summary">
+        <div className="summary-card">
+          <div className="summary-number">15</div>
+          <div className="summary-label">Reportes Mensuales</div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-number">8</div>
+          <div className="summary-label">Reportes Trimestrales</div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-number">3</div>
+          <div className="summary-label">Reportes Anuales</div>
+        </div>
+      </div>
+
+      <div className="reportes-content">
         <div className="section-header">
-          <h2 className="section-title">📈 Reportes y Estadísticas</h2>
+          <h2 className="section-title">Reportes Generados</h2>
           <div className="table-toolbar">
             <button className="btn btn-primary">
               <span>📊</span> Generar Reporte
@@ -20,21 +52,6 @@ const Reportes = () => {
             <button className="btn btn-secondary">
               <span>📤</span> Exportar Todos
             </button>
-          </div>
-        </div>
-
-        <div className="summary-cards">
-          <div className="summary-card-small">
-            <div className="number">15</div>
-            <div className="label">Reportes Mensuales</div>
-          </div>
-          <div className="summary-card-small">
-            <div className="number">8</div>
-            <div className="label">Reportes Trimestrales</div>
-          </div>
-          <div className="summary-card-small">
-            <div className="number">3</div>
-            <div className="label">Reportes Anuales</div>
           </div>
         </div>
 
@@ -72,41 +89,28 @@ const Reportes = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Reporte Flota - Marzo 2024</td>
-              <td>Vehículos</td>
-              <td>Mensual</td>
-              <td>01/04/2024</td>
-              <td>Admin</td>
-              <td>2.5 MB</td>
-              <td>
-                <div className="action-buttons">
-                  <button className="icon-btn" title="Descargar">📤</button>
-                  <button className="icon-btn" title="Ver">👁️</button>
-                  <button className="icon-btn" title="Eliminar">🗑️</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>Consumo Combustible - Q1 2024</td>
-              <td>Combustible</td>
-              <td>Trimestral</td>
-              <td>05/04/2024</td>
-              <td>Admin</td>
-              <td>1.8 MB</td>
-              <td>
-                <div className="action-buttons">
-                  <button className="icon-btn" title="Descargar">📤</button>
-                  <button className="icon-btn" title="Ver">👁️</button>
-                  <button className="icon-btn" title="Eliminar">🗑️</button>
-                </div>
-              </td>
-            </tr>
+            {reportes.map((reporte, index) => (
+              <tr key={index}>
+                <td>{reporte.nombre}</td>
+                <td>{reporte.tipo}</td>
+                <td>{reporte.periodo}</td>
+                <td>{reporte.fechaGeneracion}</td>
+                <td>{reporte.generadoPor}</td>
+                <td>{reporte.tamaño}</td>
+                <td>
+                  <div className="action-buttons">
+                    <button className="icon-btn" title="Descargar">📤</button>
+                    <button className="icon-btn" title="Ver">👁️</button>
+                    <button className="icon-btn" title="Eliminar">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-      </section>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Reportes
+export default Reportes;

@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import RodedoTable from '../../../components/Sidebar/RodedoTable'
-import ColumnSelector from '../../../components/Common/Columns/ColumnSelector'
+import RodadoTable from '../../../components/Sidebar/RodadoTable'
 import ModalVehiculo from '../../../components/Common/ModalVehiculo'
 import ModalVerVehiculo from '../../../components/Common/ModalVerVehiculo'
 import './RodadoMaquinarias.css'
@@ -41,7 +40,7 @@ const RodadoMaquinarias = () => {
           </div>
         </div>
 
-        <RodedoTable onVerVehiculo={handleVerVehiculo} />
+        <RodadoTable onVerVehiculo={handleVerVehiculo} />
       </section>
 
       {/* Modales */}

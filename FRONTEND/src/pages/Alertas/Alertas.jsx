@@ -1,18 +1,54 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import './Alertas.css'
+import React from 'react';
+import './Alertas.css';
 
 const Alertas = () => {
+  const alertas = [
+    {
+      id: 'ALT-001',
+      categoria: 'Vencimientos',
+      descripcion: 'VTV por vencer',
+      elemento: 'AB-123-CD',
+      fechaGeneracion: '01/04/2024',
+      vencimiento: '15/04/2024',
+      nivel: 'Alto',
+      estado: 'Pendiente'
+    },
+    {
+      id: 'ALT-002',
+      categoria: 'Mantenimiento',
+      descripcion: 'Service próximo',
+      elemento: 'EF-456-GH',
+      fechaGeneracion: '28/03/2024',
+      vencimiento: '05/04/2024',
+      nivel: 'Crítico',
+      estado: 'Pendiente'
+    }
+  ];
+
   return (
     <div className="alertas-page">
-      <div className="breadcrumb">
-        <Link to="/">Dashboard</Link>
-        <span>Alertas</span>
+      <div className="page-header">
+        <h1>🔔 Sistema de Alertas</h1>
       </div>
 
-      <section className="data-section">
+      <div className="alertas-summary">
+        <div className="summary-card">
+          <div className="summary-number">8</div>
+          <div className="summary-label">Alertas Activas</div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-number">3</div>
+          <div className="summary-label">Críticas</div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-number">12</div>
+          <div className="summary-label">Resueltas Hoy</div>
+        </div>
+      </div>
+
+      <div className="alertas-content">
         <div className="section-header">
-          <h2 className="section-title">🔔 Sistema de Alertas</h2>
+          <h2 className="section-title">Alertas Activas</h2>
           <div className="table-toolbar">
             <button className="btn btn-primary">
               <span>⚙️</span> Configurar Alertas
@@ -23,29 +59,12 @@ const Alertas = () => {
           </div>
         </div>
 
-        <div className="summary-cards">
-          <div className="summary-card-small">
-            <div className="number">8</div>
-            <div className="label">Alertas Activas</div>
-          </div>
-          <div className="summary-card-small">
-            <div className="number">3</div>
-            <div className="label">Críticas</div>
-          </div>
-          <div className="summary-card-small">
-            <div className="number">12</div>
-            <div className="label">Resueltas Hoy</div>
-          </div>
-        </div>
-
         <div className="filter-bar">
           <select className="filter-select">
             <option>Todas las categorías</option>
             <option>Vencimientos</option>
             <option>Mantenimiento</option>
             <option>Documentación</option>
-            <option>Seguros</option>
-            <option>Personal</option>
           </select>
           <select className="filter-select">
             <option>Todos los niveles</option>
@@ -78,45 +97,38 @@ const Alertas = () => {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>ALT-001</td>
-              <td>Vencimientos</td>
-              <td>VTV por vencer</td>
-              <td>AB-123-CD</td>
-              <td>01/04/2024</td>
-              <td>15/04/2024</td>
-              <td><span className="status-badge status-warning">Alto</span></td>
-              <td><span className="status-badge status-warning">Pendiente</span></td>
-              <td>
-                <div className="action-buttons">
-                  <button className="icon-btn" title="Resolver">✅</button>
-                  <button className="icon-btn" title="Posponer">⏰</button>
-                  <button className="icon-btn" title="Ver">👁️</button>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>ALT-002</td>
-              <td>Mantenimiento</td>
-              <td>Service próximo</td>
-              <td>EF-456-GH</td>
-              <td>28/03/2024</td>
-              <td>05/04/2024</td>
-              <td><span className="status-badge status-expired">Crítico</span></td>
-              <td><span className="status-badge status-warning">Pendiente</span></td>
-              <td>
-                <div className="action-buttons">
-                  <button className="icon-btn" title="Resolver">✅</button>
-                  <button className="icon-btn" title="Posponer">⏰</button>
-                  <button className="icon-btn" title="Ver">👁️</button>
-                </div>
-              </td>
-            </tr>
+            {alertas.map(alerta => (
+              <tr key={alerta.id}>
+                <td>{alerta.id}</td>
+                <td>{alerta.categoria}</td>
+                <td>{alerta.descripcion}</td>
+                <td>{alerta.elemento}</td>
+                <td>{alerta.fechaGeneracion}</td>
+                <td>{alerta.vencimiento}</td>
+                <td>
+                  <span className={`status-badge status-${alerta.nivel.toLowerCase()}`}>
+                    {alerta.nivel}
+                  </span>
+                </td>
+                <td>
+                  <span className={`status-badge status-${alerta.estado.toLowerCase().replace(' ', '-')}`}>
+                    {alerta.estado}
+                  </span>
+                </td>
+                <td>
+                  <div className="action-buttons">
+                    <button className="icon-btn" title="Resolver">✅</button>
+                    <button className="icon-btn" title="Posponer">⏰</button>
+                    <button className="icon-btn" title="Ver">👁️</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-      </section>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Alertas
+export default Alertas;

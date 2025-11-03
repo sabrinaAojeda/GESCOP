@@ -2,15 +2,38 @@
   display: grid;
   grid-template-columns: 250px 1fr;
   min-height: 100vh;
+  background: #f9fafb;
+}
+
+.sidebar {
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  position: fixed;
+  width: 250px;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .main-content {
   grid-column: 2;
-  background: #f9fafb;
   min-height: 100vh;
+  margin-left: 250px;
+  display: flex;
+  flex-direction: column;
 }
 
-.page-content {
+.content-area {
+  flex: 1;
   padding: 20px;
-  margin-left: 0;
+  background: #f9fafb;
+  overflow-y: auto;
+}
+
+/* Centrado para páginas específicas */
+.configuration-page,
+.alertas-page,
+.reportes-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }

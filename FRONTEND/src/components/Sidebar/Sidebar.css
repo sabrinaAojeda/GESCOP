@@ -1,11 +1,6 @@
 .sidebar {
-  background: white;
-  border-right: 1px solid #e5e7eb;
   padding: 20px;
-  position: fixed;
-  width: 250px;
-  height: 100vh;
-  overflow-y: auto;
+  height: 100%;
 }
 
 .logo {
@@ -25,9 +20,10 @@
 .nav-title {
   font-size: 12px;
   text-transform: uppercase;
-  color: #4b5563;
+  color: #6b7280;
   margin-bottom: 15px;
   font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .nav-item {
@@ -41,15 +37,12 @@
   cursor: pointer;
   transition: all 0.3s;
   text-decoration: none;
-  color: #4b5563;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
+  color: #6b7280;
   font-size: 14px;
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item:hover,
+.nav-item.active {
   background: #2563eb;
   color: white;
 }
@@ -57,9 +50,10 @@
 .nav-item.has-submenu::after {
   content: '▾';
   transition: transform 0.3s;
+  font-size: 12px;
 }
 
-.nav-item.expanded::after {
+.nav-item.has-submenu.expanded::after {
   transform: rotate(180deg);
 }
 
@@ -84,11 +78,12 @@
   cursor: pointer;
   transition: all 0.3s;
   text-decoration: none;
-  color: #4b5563;
-  font-size: 14px;
+  color: #6b7280;
+  font-size: 13px;
 }
 
-.submenu-item:hover, .submenu-item.active {
+.submenu-item:hover,
+.submenu-item.active {
   background: #f3f4f6;
   color: #2563eb;
 }
