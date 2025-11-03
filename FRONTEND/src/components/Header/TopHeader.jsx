@@ -1,39 +1,28 @@
-import React from 'react';
+import React from 'react'
+import './TopHeader.css'
 
-const TopHeader = ({ user, onLogout }) => {
-  const handleSearch = (e) => {
-    if (e.key === 'Enter') {
-      // Implementar búsqueda global
-      console.log('Buscar:', e.target.value);
-    }
-  };
-
+const TopHeader = () => {
   return (
-    <header className="top-header">
+    <div className="top-header">
       <div className="search-bar">
         <span>🔍</span>
         <input 
           type="text" 
           placeholder="Buscar documentos, vehículos, personas..." 
-          onKeyPress={handleSearch}
+          className="search-input"
         />
       </div>
 
       <div className="user-actions">
-        <div style={{ position: 'relative' }}>
+        <div className="notification-icon">
           <span>🔔</span>
           <div className="notification-badge">3</div>
         </div>
-        <div style={{display:'flex',gap:'3px'}} >
-          <span >👤</span>
-          {user?.name || 'Administrador'}
-        </div>
-        <button className="btn btn-secondary" onClick={onLogout}>
-          🚪 Salir
-        </button>
+        <div className="user-info">👤 Administrador</div>
+        <button className="btn btn-secondary">🚪 Salir</button>
       </div>
-    </header>
-  );
-};
+    </div>
+  )
+}
 
-export default TopHeader;
+export default TopHeader

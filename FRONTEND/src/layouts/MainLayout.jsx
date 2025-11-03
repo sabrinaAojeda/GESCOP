@@ -1,21 +1,21 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/Sidebar/Sidebar';
-import TopHeader from '../components/Header/TopHeader';
-import './MainLayout.css';
+import React from 'react'
+import { Outlet } from 'react-router-dom'
+import Sidebar from '../components/Sidebar/Sidebar'
+import Header from '../components/Header/Header'
+import './MainLayout.css'
 
 const MainLayout = () => {
   return (
-    <div className="main-layout">
+    <div className="app-container">
       <Sidebar />
-      <div className="main-content">
-        <TopHeader />
-        <div className="content-area">
-          <Outlet /> {/* Esto renderiza las páginas hijas */}
+      <main className="main-content">
+        <Header />
+        <div className="page-content">
+          <Outlet />
         </div>
-      </div>
+      </main>
     </div>
-  );
-};
+  )
+}
 
-export default MainLayout;
+export default MainLayout

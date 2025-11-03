@@ -1,29 +1,33 @@
 import React from 'react'
+import { useLocation } from 'react-router-dom'
+import TopHeader from './TopHeader'
 import './Header.css'
 
-const Header = ({ onLogout }) => {
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout()
+const Header = () => {
+  const location = useLocation()
+
+  const getPageTitle = () => {
+    const routes = {
+      '/': 'Dashboard',
+      '/rodado-maquinarias': 'Rodado y Maquinarias',
+      '/listado-vehiculos': 'Listado de Vehículos',
+      '/vehiculos-vendidos': 'Vehículos Vendidos',
+      '/equipamiento-vehiculos': 'Equipamiento',
+      '/personal': 'Personal',
+      '/sedes': 'Sedes/Empresas',
+      '/proveedores': 'Proveedores',
+      '/reportes': 'Reportes',
+      '/alertas': 'Alertas',
+      '/configuracion': 'Configuración'
     }
+    return routes[location.pathname] || 'Dashboard'
   }
 
   return (
-    <header className="top-header">
-      <div className="search-bar">
-        <span>🔍</span>
-        <input type="text" placeholder="Buscar documentos, vehículos, personas..." />
-      </div>
-      
-      <div className="user-actions">
-        <div style={{ position: 'relative' }}>
-          <span>🔔</span>
-          <div className="notification-badge">3</div>
-        </div>
-        <div>👤 Administrador</div>
-        <button className="btn btn-secondary" onClick={handleLogout}>
-          🚪 Salir
-        </button>
+    <header className="header">
+      <div className="header-content">
+        <h1 className="page-title">{getPageTitle()}</h1>
+        <TopHeader />
       </div>
     </header>
   )

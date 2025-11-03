@@ -1,60 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { useApp } from '../../context/AppContext';
-import './ModalVehiculo.css';
+import React, { useState, useEffect } from "react";
+import { useApp } from "../../context/AppContext";
+import "./ModalVehiculo.css";
 
-const ModalVehiculo = ({ mode = 'crear' }) => {
-  const { 
-    modalNuevoVehiculo, 
-    modalEditarVehiculo, 
-    vehiculoSeleccionado, 
-    cerrarModales, 
-    agregarVehiculo, 
-    editarVehiculo 
-  } = useApp();
-
+const ModalVehiculo = ({ mode = "crear", vehiculo, onClose }) => {
+  const { agregarVehiculo, actualizarVehiculo } = useApp();
   const [formData, setFormData] = useState({
-    interno: '',
-    anio: '',
-    dominio: '',
-    modelo: '',
-    eqIncorporado: '',
-    sector: '',
-    chofer: '',
-    estado: '',
-    observaciones: '',
-    vtvVencimiento: '',
-    vtvEstado: '',
-    habilitacionVencimiento: '',
-    habilitacionEstado: '',
-    tipoSeguro: '',
-    seguroTecnico: '',
-    seguroCargas: ''
+    interno: "",
+    anio: "",
+    dominio: "",
+    modelo: "",
+    eqIncorporado: "",
+    sector: "",
+    chofer: "",
+    estado: "",
+    observaciones: "",
+    vtvVencimiento: "",
+    vtvEstado: "",
+    habilitacionVencimiento: "",
+    habilitacionEstado: "",
+    tipoSeguro: "",
+    seguroTecnico: "",
+    seguroCargas: ""
   });
 
-  const isOpen = mode === 'crear' ? modalNuevoVehiculo : modalEditarVehiculo;
-
   useEffect(() => {
-    if (vehiculoSeleccionado && mode === 'editar') {
-      setFormData({
-        interno: vehiculoSeleccionado.interno || '',
-        anio: vehiculoSeleccionado.anio || '',
-        dominio: vehiculoSeleccionado.dominio || '',
-        modelo: vehiculoSeleccionado.modelo || '',
-        eqIncorporado: vehiculoSeleccionado.eqIncorporado || '',
-        sector: vehiculoSeleccionado.sector || '',
-        chofer: vehiculoSeleccionado.chofer || '',
-        estado: vehiculoSeleccionado.estado || '',
-        observaciones: vehiculoSeleccionado.observaciones || '',
-        vtvVencimiento: vehiculoSeleccionado.vtvVencimiento || '',
-        vtvEstado: vehiculoSeleccionado.vtvEstado || '',
-        habilitacionVencimiento: vehiculoSeleccionado.habilitacionVencimiento || '',
-        habilitacionEstado: vehiculoSeleccionado.habilitacionEstado || '',
-        tipoSeguro: vehiculoSeleccionado.tipoSeguro || '',
-        seguroTecnico: vehiculoSeleccionado.seguroTecnico || '',
-        seguroCargas: vehiculoSeleccionado.seguroCargas || ''
-      });
+    if (mode === "editar" && vehiculo) {
+      setFormData(vehiculo);
     }
-  }, [vehiculoSeleccionado, mode]);
+  }, [mode, vehiculo]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -67,38 +40,26 @@ const ModalVehiculo = ({ mode = 'crear' }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validación básica
-    if (!formData.interno || !formData.anio || !formData.dominio || !formData.modelo || !formData.sector || !formData.estado) {
-      alert('Por favor complete todos los campos obligatorios (*)');
-      return;
-    }
-
-    if (mode === 'crear') {
+    if (mode === "crear") {
       agregarVehiculo(formData);
     } else {
-      editarVehiculo(vehiculoSeleccionado.id, formData);
+      actualizarVehiculo(vehiculo.id, formData);
     }
-
-    cerrarModales();
-    setFormData({
-      interno: '', anio: '', dominio: '', modelo: '', eqIncorporado: '',
-      sector: '', chofer: '', estado: '', observaciones: '',
-      vtvVencimiento: '', vtvEstado: '', habilitacionVencimiento: '', habilitacionEstado: '',
-      tipoSeguro: '', seguroTecnico: '', seguroCargas: ''
-    });
+    
+    onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="modal-overlay" onClick={cerrarModales}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{mode === 'crear' ? '➕ Nuevo Vehículo' : '✏️ Editar Vehículo'}</h2>
-          <button className="close-modal" onClick={cerrarModales}>×</button>
+    <div className="modal-vehiculo-overlay">
+      <div className="modal-vehiculo-content">
+        <div className="modal-vehiculo-header">
+          <h2 className="modal-vehiculo-title">
+            {mode === "crear" ? "➕ Nuevo Vehículo" : "✏️ Editar Vehículo"}
+          </h2>
+          <button className="modal-vehiculo-close" onClick={onClose}>×</button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form className="modal-vehiculo-form" onSubmit={handleSubmit}>
           <div className="form-section">
             <h3 className="form-section-title">Información Básica</h3>
             <div className="form-row">
@@ -127,7 +88,6 @@ const ModalVehiculo = ({ mode = 'crear' }) => {
                 />
               </div>
             </div>
-            
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Dominio *</label>
@@ -152,7 +112,6 @@ const ModalVehiculo = ({ mode = 'crear' }) => {
                 />
               </div>
             </div>
-            
             <div className="form-group">
               <label className="form-label">Equipamiento Incorporado</label>
               <input
@@ -199,7 +158,6 @@ const ModalVehiculo = ({ mode = 'crear' }) => {
                 </select>
               </div>
             </div>
-            
             <div className="form-group">
               <label className="form-label">Chofer Asignado</label>
               <select
@@ -213,7 +171,6 @@ const ModalVehiculo = ({ mode = 'crear' }) => {
                 <option value="María García">María García</option>
               </select>
             </div>
-            
             <div className="form-group">
               <label className="form-label">Observaciones</label>
               <textarea
@@ -226,12 +183,12 @@ const ModalVehiculo = ({ mode = 'crear' }) => {
             </div>
           </div>
 
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={cerrarModales}>
+          <div className="modal-vehiculo-actions">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary">
-              {mode === 'crear' ? 'Guardar Vehículo' : 'Guardar Cambios'}
+              {mode === "crear" ? "Guardar Vehículo" : "Actualizar Vehículo"}
             </button>
           </div>
         </form>

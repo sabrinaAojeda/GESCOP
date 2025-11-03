@@ -1,112 +1,85 @@
-import React from 'react';
-import { useApp } from '../../context/AppContext';
-import { useTableActions } from '../../hooks/useTableActions';
-import { useFiltros } from '../../hooks/useFiltros';
-import './RodadoTable.css';
+import React, { useState, useEffect } from 'react'
+import { useApp } from '../../context/AppContext'
+import './RodedoTable.css'
 
-const RodadoTable = () => {
-  const { vehiculos } = useApp();
-  const { generarBotonesAcciones } = useTableActions();
+const RodedoTable = ({ onVerVehiculo }) => {
+  const { vehiculos, columnasVisibles } = useApp()
+  const [filtros, setFiltros] = useState({
+    buscar: '',
+    sector: '',
+    estado: ''
+  })
+  const [vehiculosFiltrados, setVehiculosFiltrados] = useState([])
 
-  const columnasConfig = [
-    { key: 'interno', label: 'INT.', visible: true },
-    { key: 'anio', label: 'AÑO', visible: true },
-    { key: 'dominio', label: 'DOMINIO', visible: true },
-    { key: 'modelo', label: 'MODELO', visible: true },
-    { key: 'eqIncorporado', label: 'EQ. INCORPORADO', visible: false },
-    { key: 'sector', label: 'SECTOR', visible: true },
-    { key: 'chofer', label: 'CHOFER', visible: false },
-    { key: 'estado', label: 'ESTADO', visible: true },
-    { key: 'observaciones', label: 'OBSERVACIONES', visible: false },
-    { key: 'vtvVencimiento', label: 'VTV VTO.', visible: false },
-    { key: 'vtvEstado', label: 'VTV EV', visible: false },
-    { key: 'habilitacionVencimiento', label: 'HAB. VTO.', visible: false },
-    { key: 'habilitacionEstado', label: 'HAB. EH', visible: false },
-    { key: 'tipoSeguro', label: 'TIPO SEGURO', visible: false },
-    { key: 'seguroTecnico', label: 'SEG. TÉCNICO', visible: false },
-    { key: 'seguroCargas', label: 'SEG. CARGAS PEL.', visible: false }
-  ];
+  useEffect(() => {
+    filtrarVehiculos()
+  }, [filtros, vehiculos])
 
-  const {
-    datosFiltrados,
-    filtros,
-    columnasVisibles,
-    manejarBusqueda,
-    manejarFiltroEspecifico,
-    cantidadFiltrados,
-    cantidadTotal
-  } = useFiltros(vehiculos, columnasConfig);
+  const filtrarVehiculos = () => {
+    let filtrados = vehiculos
+
+    if (filtros.buscar) {
+      const busqueda = filtros.buscar.toLowerCase()
+      filtrados = filtrados.filter(v => 
+        v.interno.toLowerCase().includes(busqueda) ||
+        v.dominio.toLowerCase().includes(busqueda) ||
+        v.modelo.toLowerCase().includes(busqueda) ||
+        (v.chofer && v.chofer.toLowerCase().includes(busqueda))
+      )
+    }
+
+    if (filtros.sector) {
+      filtrados = filtrados.filter(v => v.sector === filtros.sector)
+    }
+
+    if (filtros.estado) {
+      filtrados = filtrados.filter(v => v.estado === filtros.estado)
+    }
+
+    setVehiculosFiltrados(filtrados)
+  }
 
   const getEstadoClass = (estado) => {
-    if (!estado) return '';
+    if (!estado) return ''
     switch(estado.toLowerCase()) {
       case 'activo':
       case 'vigente':
-        return 'status-active';
+        return 'status-active'
       case 'por vencer':
       case 'mantenimiento':
-        return 'status-warning';
+        return 'status-warning'
       case 'vencido':
       case 'inactivo':
-        return 'status-expired';
+        return 'status-expired'
       default:
-        return '';
+        return ''
     }
-  };
+  }
 
   const formatearFecha = (fechaString) => {
-    if (!fechaString) return '';
+    if (!fechaString) return ''
     try {
-      const fecha = new Date(fechaString);
-      return fecha.toLocaleDateString('es-AR');
+      const fecha = new Date(fechaString)
+      return fecha.toLocaleDateString('es-AR')
     } catch (e) {
-      return fechaString;
+      return fechaString
     }
-  };
+  }
 
   return (
-    <section className="data-section">
-      <div className="section-header">
-        <h2 className="section-title">🚛 Rodado y Maquinarias</h2>
-        <div className="table-toolbar">
-          <div className="column-selector">
-            <button className="btn btn-secondary">
-              <span>👁️</span> Columnas
-            </button>
-            <div className="column-selector-content">
-              {columnasConfig.map(columna => (
-                <label key={columna.key} className="column-option">
-                  <input 
-                    type="checkbox" 
-                    checked={columnasVisibles[columna.key]} 
-                    onChange={() => {}} // Se manejará en el hook
-                    disabled={columna.key === 'interno' || columna.key === 'anio' || columna.key === 'dominio'}
-                  />
-                  {columna.label}
-                </label>
-              ))}
-            </div>
-          </div>
-          <button className="btn btn-secondary">
-            <span>📤</span> Exportar
-          </button>
-          <button className="btn btn-primary">
-            <span>+</span> Nuevo Vehículo
-          </button>
-        </div>
-      </div>
-
+    <div className="rodedo-table-container">
       <div className="filter-bar">
         <input 
           type="text" 
           className="filter-select" 
           placeholder="Buscar..." 
-          value={filtros.busqueda}
-          onChange={(e) => manejarBusqueda(e.target.value)}
+          value={filtros.buscar}
+          onChange={(e) => setFiltros(prev => ({ ...prev, buscar: e.target.value }))}
         />
         <select 
           className="filter-select"
-          onChange={(e) => manejarFiltroEspecifico('sector', e.target.value)}
+          value={filtros.sector}
+          onChange={(e) => setFiltros(prev => ({ ...prev, sector: e.target.value }))}
         >
           <option value="">Todos los sectores</option>
           <option value="Logística">Logística</option>
@@ -115,7 +88,8 @@ const RodadoTable = () => {
         </select>
         <select 
           className="filter-select"
-          onChange={(e) => manejarFiltroEspecifico('estado', e.target.value)}
+          value={filtros.estado}
+          onChange={(e) => setFiltros(prev => ({ ...prev, estado: e.target.value }))}
         >
           <option value="">Todos los estados</option>
           <option value="Activo">Activo</option>
@@ -124,53 +98,102 @@ const RodadoTable = () => {
         </select>
       </div>
 
-      <table className="data-table">
-        <thead>
-          <tr>
-            {columnasConfig.map(columna => 
-              columnasVisibles[columna.key] && (
-                <th key={columna.key} className={`col-${columna.key}`}>
-                  {columna.label}
-                </th>
-              )
-            )}
-            <th className="col-acciones">ACCIONES</th>
-          </tr>
-        </thead>
-        <tbody>
-          {datosFiltrados.map(vehiculo => (
-            <tr key={vehiculo.id}>
-              {columnasConfig.map(columna => 
-                columnasVisibles[columna.key] && (
-                  <td key={columna.key} className={`col-${columna.key}`}>
-                    {columna.key === 'estado' || 
-                     columna.key === 'vtvEstado' || 
-                     columna.key === 'habilitacionEstado' || 
-                     columna.key === 'seguroTecnico' || 
-                     columna.key === 'seguroCargas' ? (
-                      <span className={`status-badge ${getEstadoClass(vehiculo[columna.key])}`}>
-                        {vehiculo[columna.key]}
-                      </span>
-                    ) : columna.key === 'vtvVencimiento' || columna.key === 'habilitacionVencimiento' ? (
-                      formatearFecha(vehiculo[columna.key])
-                    ) : (
-                      vehiculo[columna.key] || ''
-                    )}
-                  </td>
-                )
-              )}
-              <td className="col-acciones">
-                {generarBotonesAcciones('vehiculo', vehiculo.id, vehiculo)}
-              </td>
+      <div className="table-responsive">
+        <table className="data-table">
+          <thead>
+            <tr>
+              {columnasVisibles.interno && <th className="col-interno">INT.</th>}
+              {columnasVisibles.anio && <th className="col-anio">AÑO</th>}
+              {columnasVisibles.dominio && <th className="col-dominio">DOMINIO</th>}
+              {columnasVisibles.modelo && <th className="col-modelo">MODELO</th>}
+              {columnasVisibles['eq-incorporado'] && <th className="col-eq-incorporado">EQ. INCORPORADO</th>}
+              {columnasVisibles.sector && <th className="col-sector">SECTOR</th>}
+              {columnasVisibles.chofer && <th className="col-chofer">CHOFER</th>}
+              {columnasVisibles.estado && <th className="col-estado">ESTADO</th>}
+              {columnasVisibles.observaciones && <th className="col-observaciones">OBSERVACIONES</th>}
+              {columnasVisibles['vtv-vencimiento'] && <th className="col-vtv-vencimiento">VTV VTO.</th>}
+              {columnasVisibles['vtv-ev'] && <th className="col-vtv-ev">VTV EV</th>}
+              {columnasVisibles['habilitacion-vencimiento'] && <th className="col-habilitacion-vencimiento">HAB. VTO.</th>}
+              {columnasVisibles['habilitacion-eh'] && <th className="col-habilitacion-eh">HAB. EH</th>}
+              {columnasVisibles['tipo-seguro'] && <th className="col-tipo-seguro">TIPO SEGURO</th>}
+              {columnasVisibles['seguro-tecnico'] && <th className="col-seguro-tecnico">SEG. TÉCNICO</th>}
+              {columnasVisibles['seguro-cargas'] && <th className="col-seguro-cargas">SEG. CARGAS PEL.</th>}
+              <th className="col-acciones">ACCIONES</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="contador">
-        Mostrando {cantidadFiltrados} de {cantidadTotal} vehículos
+          </thead>
+          <tbody>
+            {vehiculosFiltrados.map(vehiculo => (
+              <tr key={vehiculo.id}>
+                {columnasVisibles.interno && <td className="col-interno">{vehiculo.interno}</td>}
+                {columnasVisibles.anio && <td className="col-anio">{vehiculo.anio}</td>}
+                {columnasVisibles.dominio && <td className="col-dominio">{vehiculo.dominio}</td>}
+                {columnasVisibles.modelo && <td className="col-modelo">{vehiculo.modelo}</td>}
+                {columnasVisibles['eq-incorporado'] && <td className="col-eq-incorporado">{vehiculo.eqIncorporado || ''}</td>}
+                {columnasVisibles.sector && <td className="col-sector">{vehiculo.sector}</td>}
+                {columnasVisibles.chofer && <td className="col-chofer">{vehiculo.chofer || ''}</td>}
+                {columnasVisibles.estado && (
+                  <td className="col-estado">
+                    <span className={`status-badge ${getEstadoClass(vehiculo.estado)}`}>
+                      {vehiculo.estado}
+                    </span>
+                  </td>
+                )}
+                {columnasVisibles.observaciones && <td className="col-observaciones">{vehiculo.observaciones || ''}</td>}
+                {columnasVisibles['vtv-vencimiento'] && <td className="col-vtv-vencimiento">{formatearFecha(vehiculo.vtvVencimiento)}</td>}
+                {columnasVisibles['vtv-ev'] && (
+                  <td className="col-vtv-ev">
+                    <span className={`status-badge ${getEstadoClass(vehiculo.vtvEstado)}`}>
+                      {vehiculo.vtvEstado || ''}
+                    </span>
+                  </td>
+                )}
+                {columnasVisibles['habilitacion-vencimiento'] && <td className="col-habilitacion-vencimiento">{formatearFecha(vehiculo.habilitacionVencimiento)}</td>}
+                {columnasVisibles['habilitacion-eh'] && (
+                  <td className="col-habilitacion-eh">
+                    <span className={`status-badge ${getEstadoClass(vehiculo.habilitacionEstado)}`}>
+                      {vehiculo.habilitacionEstado || ''}
+                    </span>
+                  </td>
+                )}
+                {columnasVisibles['tipo-seguro'] && <td className="col-tipo-seguro">{vehiculo.tipoSeguro || ''}</td>}
+                {columnasVisibles['seguro-tecnico'] && (
+                  <td className="col-seguro-tecnico">
+                    <span className={`status-badge ${getEstadoClass(vehiculo.seguroTecnico)}`}>
+                      {vehiculo.seguroTecnico || ''}
+                    </span>
+                  </td>
+                )}
+                {columnasVisibles['seguro-cargas'] && (
+                  <td className="col-seguro-cargas">
+                    <span className={`status-badge ${getEstadoClass(vehiculo.seguroCargas)}`}>
+                      {vehiculo.seguroCargas || ''}
+                    </span>
+                  </td>
+                )}
+                <td className="col-acciones">
+                  <div className="action-buttons">
+                    <button 
+                      className="icon-btn" 
+                      title="Ver"
+                      onClick={() => onVerVehiculo(vehiculo)}
+                    >
+                      👁️
+                    </button>
+                    <button className="icon-btn" title="Editar">✏️</button>
+                    <button className="icon-btn" title="Documentación">📄</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </section>
-  );
-};
+      
+      <div className="contador">
+        Mostrando {vehiculosFiltrados.length} de {vehiculos.length} vehículos
+      </div>
+    </div>
+  )
+}
 
-export default RodadoTable;
+export default RodedoTable

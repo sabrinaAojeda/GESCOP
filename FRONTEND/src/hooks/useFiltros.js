@@ -1,72 +1,74 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react'
 
-export const useFiltros = (datos, columnasConfig) => {
+export const useFiltros = (datos) => {
   const [filtros, setFiltros] = useState({
-    busqueda: '',
-    filtrosEspecificos: {}
-  });
+    buscar: '',
+    sector: '',
+    estado: '',
+    fechaDesde: '',
+    fechaHasta: ''
+  })
 
-  const [columnasVisibles, setColumnasVisibles] = useState(
-    columnasConfig.reduce((acc, col) => {
-      acc[col.key] = col.visible !== false;
-      return acc;
-    }, {})
-  );
-
-  // Aplicar filtros a los datos
   const datosFiltrados = useMemo(() => {
-    return datos.filter(item => {
-      // Filtro de búsqueda general
-      const coincideBusqueda = !filtros.busqueda || 
-        Object.values(item).some(valor => 
-          String(valor).toLowerCase().includes(filtros.busqueda.toLowerCase())
-        );
+    let resultado = datos
 
-      // Filtros específicos por columna
-      const coincideFiltrosEspecificos = Object.entries(filtros.filtrosEspecificos).every(([key, valor]) => {
-        if (!valor) return true;
-        return String(item[key]).toLowerCase().includes(String(valor).toLowerCase());
-      });
+    // Filtro de búsqueda general
+    if (filtros.buscar) {
+      const busqueda = filtros.buscar.toLowerCase()
+      resultado = resultado.filter(item =>
+        Object.values(item).some(valor =>
+          String(valor).toLowerCase().includes(busqueda)
+        )
+      )
+    }
 
-      return coincideBusqueda && coincideFiltrosEspecificos;
-    });
-  }, [datos, filtros]);
+    // Filtro por sector
+    if (filtros.sector) {
+      resultado = resultado.filter(item => item.sector === filtros.sector)
+    }
 
-  // Manejar cambio en búsqueda general
-  const manejarBusqueda = (valor) => {
+    // Filtro por estado
+    if (filtros.estado) {
+      resultado = resultado.filter(item => item.estado === filtros.estado)
+    }
+
+    // Filtro por fechas
+    if (filtros.fechaDesde) {
+      resultado = resultado.filter(item => 
+        !item.fechaVencimiento || item.fechaVencimiento >= filtros.fechaDesde
+      )
+    }
+
+    if (filtros.fechaHasta) {
+      resultado = resultado.filter(item => 
+        !item.fechaVencimiento || item.fechaVencimiento <= filtros.fechaHasta
+      )
+    }
+
+    return resultado
+  }, [datos, filtros])
+
+  const actualizarFiltro = (campo, valor) => {
     setFiltros(prev => ({
       ...prev,
-      busqueda: valor
-    }));
-  };
+      [campo]: valor
+    }))
+  }
 
-  // Manejar cambio en filtros específicos
-  const manejarFiltroEspecifico = (columna, valor) => {
-    setFiltros(prev => ({
-      ...prev,
-      filtrosEspecificos: {
-        ...prev.filtrosEspecificos,
-        [columna]: valor
-      }
-    }));
-  };
-
-  // Manejar visibilidad de columnas
-  const toggleColumna = (columnaKey) => {
-    setColumnasVisibles(prev => ({
-      ...prev,
-      [columnaKey]: !prev[columnaKey]
-    }));
-  };
+  const limpiarFiltros = () => {
+    setFiltros({
+      buscar: '',
+      sector: '',
+      estado: '',
+      fechaDesde: '',
+      fechaHasta: ''
+    })
+  }
 
   return {
-    datosFiltrados,
     filtros,
-    columnasVisibles,
-    manejarBusqueda,
-    manejarFiltroEspecifico,
-    toggleColumna,
-    cantidadFiltrados: datosFiltrados.length,
-    cantidadTotal: datos.length
-  };
-};
+    datosFiltrados,
+    actualizarFiltro,
+    limpiarFiltros
+  }
+}

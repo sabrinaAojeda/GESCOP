@@ -1,15 +1,28 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import React from 'react'
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const ProtectedRoute = ({ children }) => {
-  // Verificación simple basada en localStorage
-  const userEmail = localStorage.getItem('userEmail');
-  
-  if (!userEmail) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return children;
-};
+  const { user, loading } = useAuth()
 
-export default ProtectedRoute;
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh' 
+      }}>
+        <div>Cargando...</div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  return children
+}
+
+export default ProtectedRoute

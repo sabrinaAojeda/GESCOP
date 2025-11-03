@@ -1,9 +1,9 @@
 <?php
 class Database {
     private $host = "localhost";
-    private $db_name = "gescop_db";
-    private $username = "root"; 
-    private $password = "";
+    private $db_name = "gescopve_gescopdb";
+    private $username = "gescopve_gescopbd"; 
+    private $password = "GESCOP+-2025";
     public $conn;
 
     public function getConnection() {

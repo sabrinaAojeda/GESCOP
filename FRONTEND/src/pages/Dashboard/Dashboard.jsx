@@ -1,22 +1,51 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTableActions } from '../../hooks/useTableActions';
+import React from 'react'
+import { useNavigate } from 'react-router-dom'
+import './Dashboard.css'
+
 const Dashboard = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const { manejarAccion, generarBotonesAcciones } = useTableActions();
-
-  const handleCardClick = (page) => {
-    navigate(page);
-  };
-
-  const handleVerVehiculo = (id) => {
-    // Implementar ver vehículo
-    console.log('Ver vehículo:', id);
-  };
+  const summaryCards = [
+    {
+      title: 'Flota Vehicular',
+      icon: '🚗',
+      number: '47',
+      label: 'vehículos',
+      alert: '5 vencimientos',
+      color: 'flota',
+      page: 'rodado-maquinarias'
+    },
+    {
+      title: 'Personal',
+      icon: '👥',
+      number: '24',
+      label: 'personas',
+      alert: '3 certificados por vencer',
+      color: 'personal',
+      page: 'personal'
+    },
+    {
+      title: 'Sedes/Empresas',
+      icon: '🏢',
+      number: '5',
+      label: 'sedes',
+      alert: '1 permiso vencido',
+      color: 'sedes',
+      page: 'sedes'
+    },
+    {
+      title: 'Proveedores',
+      icon: '🤝',
+      number: '12',
+      label: 'proveedores',
+      alert: '2 contratos por renovar',
+      color: 'proveedores',
+      page: 'proveedores'
+    }
+  ]
 
   return (
-    <div id="dashboard-page" className="page active">
+    <div className="dashboard-page">
       {/* Alert Panel */}
       <div className="alert-panel">
         <div className="alert-header">
@@ -25,83 +54,33 @@ const Dashboard = () => {
         </div>
         <div className="alert-item">
           <span>Seguro del vehículo AB-123-CD vence en 3 días</span>
-          <button 
-            className="btn btn-primary" 
-            style={{padding: '4px 8px', fontSize: '12px'}}
-            onClick={() => handleVerVehiculo(1)}
-          >
-            Ver
-          </button>
+          <button className="btn btn-primary small">Ver</button>
         </div>
         <div className="alert-item">
           <span>Certificado de Juan Pérez vence en 7 días</span>
-          <button className="btn btn-primary" style={{padding: '4px 8px', fontSize: '12px'}}>
-            Ver
-          </button>
+          <button className="btn btn-primary small">Ver</button>
         </div>
       </div>
 
       {/* Dashboard Summary */}
       <section className="dashboard-grid">
-        <div 
-          className="summary-card flota" 
-          onClick={() => handleCardClick('/flota/rodado-maquinarias')}
-        >
-          <div className="card-header">
-            <span className="card-icon">🚗</span>
-            <h3>Flota Vehicular</h3>
+        {summaryCards.map((card, index) => (
+          <div 
+            key={index}
+            className={`summary-card ${card.color}`}
+            onClick={() => navigate(`/${card.page}`)}
+          >
+            <div className="card-header">
+              <span className="card-icon">{card.icon}</span>
+              <h3>{card.title}</h3>
+            </div>
+            <div className="card-stats">
+              <span className="card-number">{card.number}</span>
+              <span className="card-label">{card.label}</span>
+            </div>
+            <div className="card-alert">{card.alert}</div>
           </div>
-          <div className="card-stats">
-            <span className="card-number">47</span>
-            <span className="card-label">vehículos</span>
-          </div>
-          <div className="card-alert">5 vencimientos</div>
-        </div>
-
-        <div 
-          className="summary-card personal" 
-          onClick={() => handleCardClick('/personal')}
-        >
-          <div className="card-header">
-            <span className="card-icon">👥</span>
-            <h3>Personal</h3>
-          </div>
-          <div className="card-stats">
-            <span className="card-number">24</span>
-            <span className="card-label">personas</span>
-          </div>
-          <div className="card-alert">3 certificados por vencer</div>
-        </div>
-
-        <div 
-          className="summary-card sedes" 
-          onClick={() => handleCardClick('/sedes')}
-        >
-          <div className="card-header">
-            <span className="card-icon">🏢</span>
-            <h3>Sedes/Empresas</h3>
-          </div>
-          <div className="card-stats">
-            <span className="card-number">5</span>
-            <span className="card-label">sedes</span>
-          </div>
-          <div className="card-alert">1 permiso vencido</div>
-        </div>
-
-        <div 
-          className="summary-card proveedores" 
-          onClick={() => handleCardClick('/proveedores')}
-        >
-          <div className="card-header">
-            <span className="card-icon">🤝</span>
-            <h3>Proveedores</h3>
-          </div>
-          <div className="card-stats">
-            <span className="card-number">12</span>
-            <span className="card-label">proveedores</span>
-          </div>
-          <div className="card-alert">2 contratos por renovar</div>
-        </div>
+        ))}
       </section>
 
       {/* Vencimientos Recientes Section */}
@@ -160,15 +139,9 @@ const Dashboard = () => {
               <td>📄📄</td>
               <td>
                 <div className="action-buttons">
-                  <button className="icon-btn" title="Ver" onClick={() => handleVerVehiculo(1)}>
-                    👁️
-                  </button>
-                  <button className="icon-btn" title="Editar">
-                    ✏️
-                  </button>
-                  <button className="icon-btn" title="Descargar">
-                    📤
-                  </button>
+                  <button className="icon-btn" title="Ver">👁️</button>
+                  <button className="icon-btn" title="Editar">✏️</button>
+                  <button className="icon-btn" title="Descargar">📤</button>
                 </div>
               </td>
             </tr>
@@ -176,7 +149,7 @@ const Dashboard = () => {
         </table>
       </section>
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

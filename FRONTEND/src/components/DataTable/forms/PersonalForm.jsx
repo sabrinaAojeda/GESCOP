@@ -1,4 +1,4 @@
-// FRONTEND/src/pages/Sedes/Sedes.jsx
+// FRONTEND/src/pages/Personal/Personal.jsx
 import React from 'react';
 import {
   Box,
@@ -21,15 +21,15 @@ import {
   Delete as DeleteIcon,
   Description as DocumentIcon
 } from '@mui/icons-material';
-import { useCrudOperations } from '../../hooks/useCrudOperations';
-import { useTableActions } from '../../hooks/useTableActions';
-import GenericModal from '../../components/modals/GenericModal';
+import { useCrudOperations } from '../../../hooks/useCrudOperations';
+import { useTableActions } from '../../../hooks/useTableActions';
+import GenericModal from '../../modals/GenericModal';
 import DocumentModal from '../../components/modals/DocumentModal';
-import SedeForm from '../../components/forms/SedeForm';
+import PersonalForm from './PersonalForm';
 
-const Sedes = () => {
+const Personal = () => {
   const {
-    data: sedes,
+    data: personal,
     selectedItem,
     isModalOpen,
     isViewMode,
@@ -44,15 +44,17 @@ const Sedes = () => {
   } = useCrudOperations([
     {
       id: 1,
-      nombre: 'Sede Central',
-      direccion: 'Av. Principal 1234',
-      telefono: '011-4567-8901',
-      empresa_id: 1,
-      tipo_predio: 'planta',
-      servicio_principal: 'incineración',
-      habilitada: true,
-      localidad: 'Capital',
-      provincia: 'Buenos Aires'
+      nombre: 'Juan',
+      apellido: 'Pérez',
+      dni: '30.123.456',
+      telefono: '011-1234-5678',
+      email: 'juan.perez@empresa.com',
+      cui: 'CUI123456',
+      sector: 'Logística',
+      seguro_vida: true,
+      habilitacion: 'licencia_conducir.pdf',
+      activo: true,
+      proveedor_id: null
     }
   ]);
 
@@ -66,24 +68,24 @@ const Sedes = () => {
     exportData
   } = useTableActions();
 
-  const empresas = [
-    { id: 1, nombre: 'Empresa Principal' },
-    { id: 2, nombre: 'Empresa Secundaria' }
+  const proveedores = [
+    { id: 1, nombre: 'Proveedor A' },
+    { id: 2, nombre: 'Proveedor B' }
   ];
 
-  const handleSaveSede = (sedeData) => {
-    saveItem(sedeData);
+  const handleSavePersonal = (personalData) => {
+    saveItem(personalData);
   };
 
   const handleExport = () => {
-    exportData(sedes, 'sedes');
+    exportData(personal, 'personal');
   };
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4" component="h1">
-          🏢 Gestión de Sedes
+          👥 Gestión de Personal
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
@@ -97,7 +99,7 @@ const Sedes = () => {
             startIcon={<AddIcon />}
             onClick={openCreateModal}
           >
-            Nueva Sede
+            Nuevo Personal
           </Button>
         </Box>
       </Box>
@@ -106,27 +108,33 @@ const Sedes = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Nombre</TableCell>
-              <TableCell>Dirección</TableCell>
-              <TableCell>Teléfono</TableCell>
-              <TableCell>Tipo Predio</TableCell>
-              <TableCell>Servicio Principal</TableCell>
+              <TableCell>Nombre Completo</TableCell>
+              <TableCell>DNI</TableCell>
+              <TableCell>CUI</TableCell>
+              <TableCell>Sector</TableCell>
+              <TableCell>Seguro Vida</TableCell>
               <TableCell>Estado</TableCell>
               <TableCell>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {sedes.map((sede) => (
-              <TableRow key={sede.id}>
-                <TableCell>{sede.nombre}</TableCell>
-                <TableCell>{sede.direccion}</TableCell>
-                <TableCell>{sede.telefono}</TableCell>
-                <TableCell>{sede.tipo_predio}</TableCell>
-                <TableCell>{sede.servicio_principal}</TableCell>
+            {personal.map((persona) => (
+              <TableRow key={persona.id}>
+                <TableCell>{`${persona.nombre} ${persona.apellido}`}</TableCell>
+                <TableCell>{persona.dni}</TableCell>
+                <TableCell>{persona.cui}</TableCell>
+                <TableCell>{persona.sector}</TableCell>
                 <TableCell>
                   <Chip
-                    label={sede.habilitada ? 'Habilitada' : 'No Habilitada'}
-                    color={sede.habilitada ? 'success' : 'default'}
+                    label={persona.seguro_vida ? 'Sí' : 'No'}
+                    color={persona.seguro_vida ? 'success' : 'default'}
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={persona.activo ? 'Activo' : 'Inactivo'}
+                    color={persona.activo ? 'success' : 'default'}
                     size="small"
                   />
                 </TableCell>
@@ -134,29 +142,29 @@ const Sedes = () => {
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <IconButton
                       size="small"
-                      onClick={() => openViewModal(sede.id)}
+                      onClick={() => openViewModal(persona.id)}
                       title="Ver detalles"
                     >
                       <ViewIcon />
                     </IconButton>
                     <IconButton
                       size="small"
-                      onClick={() => openEditModal(sede.id)}
-                      title="Editar sede"
+                      onClick={() => openEditModal(persona.id)}
+                      title="Editar personal"
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
                       size="small"
-                      onClick={() => openDocumentModal(sede)}
+                      onClick={() => openDocumentModal(persona)}
                       title="Gestionar documentos"
                     >
                       <DocumentIcon />
                     </IconButton>
                     <IconButton
                       size="small"
-                      onClick={() => openDeleteModal(sede.id)}
-                      title="Eliminar sede"
+                      onClick={() => openDeleteModal(persona.id)}
+                      title="Eliminar personal"
                       color="error"
                     >
                       <DeleteIcon />
@@ -169,16 +177,16 @@ const Sedes = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal para Crear/Editar/Ver Sede */}
+      {/* Modal para Crear/Editar/Ver Personal */}
       <GenericModal
         open={isModalOpen}
         onClose={closeModals}
         title={
           isViewMode 
-            ? `👁️ Ver Sede: ${selectedItem?.nombre || ''}`
+            ? `👁️ Ver Personal: ${selectedItem?.nombre || ''} ${selectedItem?.apellido || ''}`
             : selectedItem 
-            ? `✏️ Editar Sede: ${selectedItem.nombre}`
-            : '➕ Nueva Sede'
+            ? `✏️ Editar Personal: ${selectedItem.nombre} ${selectedItem.apellido}`
+            : '➕ Nuevo Personal'
         }
         actions={
           !isViewMode ? (
@@ -186,7 +194,7 @@ const Sedes = () => {
               <Button onClick={closeModals}>Cancelar</Button>
               <Button 
                 type="submit" 
-                form="sede-form" 
+                form="personal-form" 
                 variant="contained"
               >
                 {selectedItem ? 'Actualizar' : 'Crear'}
@@ -197,12 +205,12 @@ const Sedes = () => {
           )
         }
       >
-        <SedeForm
+        <PersonalForm
           initialData={selectedItem}
-          onSubmit={handleSaveSede}
+          onSubmit={handleSavePersonal}
           isEdit={!!selectedItem && !isViewMode}
           onCancel={closeModals}
-          empresas={empresas}
+          proveedores={proveedores}
           readOnly={isViewMode}
         />
       </GenericModal>
@@ -226,7 +234,7 @@ const Sedes = () => {
         }
       >
         <Typography>
-          ¿Está seguro de eliminar la sede "{selectedItem?.nombre}"? 
+          ¿Está seguro de eliminar a "{selectedItem?.nombre} {selectedItem?.apellido}"? 
           Esta acción no se puede deshacer.
         </Typography>
       </GenericModal>
@@ -243,4 +251,4 @@ const Sedes = () => {
   );
 };
 
-export default Sedes;
+export default Personal;

@@ -1,71 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react'
+import { Link } from 'react-router-dom'
+import './Alertas.css'
 
 const Alertas = () => {
-  const [alertas] = useState([
-    {
-      id: "ALT-001",
-      categoria: "Vencimientos",
-      descripcion: "VTV por vencer",
-      elemento: "AB-123-CD",
-      fechaGeneracion: "2024-04-01",
-      vencimiento: "2024-04-15",
-      nivel: "Alto",
-      estado: "Pendiente"
-    },
-    {
-      id: "ALT-002",
-      categoria: "Mantenimiento",
-      descripcion: "Service próximo",
-      elemento: "EF-456-GH",
-      fechaGeneracion: "2024-03-28",
-      vencimiento: "2024-04-05",
-      nivel: "Crítico",
-      estado: "Pendiente"
-    },
-    {
-      id: "ALT-003",
-      categoria: "Documentación",
-      descripcion: "Seguro por vencer",
-      elemento: "IJ-789-KL",
-      fechaGeneracion: "2024-04-02",
-      vencimiento: "2024-04-30",
-      nivel: "Medio",
-      estado: "En Proceso"
-    }
-  ]);
-
-  const getNivelClass = (nivel) => {
-    switch(nivel) {
-      case 'Crítico': return 'status-expired';
-      case 'Alto': return 'status-warning';
-      case 'Medio':
-      case 'Bajo': return 'status-active';
-      default: return '';
-    }
-  };
-
-  const getEstadoClass = (estado) => {
-    switch(estado) {
-      case 'Pendiente': return 'status-warning';
-      case 'En Proceso': return 'status-active';
-      case 'Resuelto': return 'status-expired';
-      default: return '';
-    }
-  };
-
-  const formatearFecha = (fechaString) => {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString('es-AR');
-  };
-
-  const alertasCriticas = alertas.filter(a => a.nivel === 'Crítico').length;
-  const alertasResueltas = alertas.filter(a => a.estado === 'Resuelto').length;
-
   return (
-    <div id="alertas-page" className="page active">
+    <div className="alertas-page">
       <div className="breadcrumb">
-        <Link to="/dashboard">Dashboard</Link> 
+        <Link to="/">Dashboard</Link>
         <span>Alertas</span>
       </div>
 
@@ -84,15 +25,15 @@ const Alertas = () => {
 
         <div className="summary-cards">
           <div className="summary-card-small">
-            <div className="number">{alertas.length}</div>
+            <div className="number">8</div>
             <div className="label">Alertas Activas</div>
           </div>
           <div className="summary-card-small">
-            <div className="number">{alertasCriticas}</div>
+            <div className="number">3</div>
             <div className="label">Críticas</div>
           </div>
           <div className="summary-card-small">
-            <div className="number">{alertasResueltas}</div>
+            <div className="number">12</div>
             <div className="label">Resueltas Hoy</div>
           </div>
         </div>
@@ -137,40 +78,45 @@ const Alertas = () => {
             </tr>
           </thead>
           <tbody>
-            {alertas.map(alerta => (
-              <tr key={alerta.id}>
-                <td>{alerta.id}</td>
-                <td>{alerta.categoria}</td>
-                <td>{alerta.descripcion}</td>
-                <td>{alerta.elemento}</td>
-                <td>{formatearFecha(alerta.fechaGeneracion)}</td>
-                <td>{formatearFecha(alerta.vencimiento)}</td>
-                <td>
-                  <span className={`status-badge ${getNivelClass(alerta.nivel)}`}>
-                    {alerta.nivel}
-                  </span>
-                </td>
-                <td>
-                  <span className={`status-badge ${getEstadoClass(alerta.estado)}`}>
-                    {alerta.estado}
-                  </span>
-                </td>
-                <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn" title="Resolver">✅</button>
-                    <button className="icon-btn" title="Posponer">⏰</button>
-                    <button className="icon-btn" title="Ver">👁️</button>
-                    <button className="icon-btn" title="Notificar">📧</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            <tr>
+              <td>ALT-001</td>
+              <td>Vencimientos</td>
+              <td>VTV por vencer</td>
+              <td>AB-123-CD</td>
+              <td>01/04/2024</td>
+              <td>15/04/2024</td>
+              <td><span className="status-badge status-warning">Alto</span></td>
+              <td><span className="status-badge status-warning">Pendiente</span></td>
+              <td>
+                <div className="action-buttons">
+                  <button className="icon-btn" title="Resolver">✅</button>
+                  <button className="icon-btn" title="Posponer">⏰</button>
+                  <button className="icon-btn" title="Ver">👁️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>ALT-002</td>
+              <td>Mantenimiento</td>
+              <td>Service próximo</td>
+              <td>EF-456-GH</td>
+              <td>28/03/2024</td>
+              <td>05/04/2024</td>
+              <td><span className="status-badge status-expired">Crítico</span></td>
+              <td><span className="status-badge status-warning">Pendiente</span></td>
+              <td>
+                <div className="action-buttons">
+                  <button className="icon-btn" title="Resolver">✅</button>
+                  <button className="icon-btn" title="Posponer">⏰</button>
+                  <button className="icon-btn" title="Ver">👁️</button>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
-        <div className="contador">Mostrando {alertas.length} alertas</div>
       </section>
     </div>
-  );
-};
+  )
+}
 
-export default Alertas;
+export default Alertas

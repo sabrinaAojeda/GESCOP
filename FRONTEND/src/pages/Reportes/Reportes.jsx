@@ -1,46 +1,12 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react'
+import { Link } from 'react-router-dom'
+import './Reportes.css'
 
 const Reportes = () => {
-  const [reportes] = useState([
-    {
-      id: 1,
-      nombre: "Reporte Flota - Marzo 2024",
-      tipo: "Vehículos",
-      periodo: "Mensual",
-      fechaGeneracion: "2024-04-01",
-      generadoPor: "Admin",
-      tamaño: "2.5 MB"
-    },
-    {
-      id: 2,
-      nombre: "Consumo Combustible - Q1 2024",
-      tipo: "Combustible",
-      periodo: "Trimestral",
-      fechaGeneracion: "2024-04-05",
-      generadoPor: "Admin",
-      tamaño: "1.8 MB"
-    },
-    {
-      id: 3,
-      nombre: "Mantenimiento Preventivo - 2024",
-      tipo: "Mantenimiento",
-      periodo: "Anual",
-      fechaGeneracion: "2024-01-15",
-      generadoPor: "Admin",
-      tamaño: "3.2 MB"
-    }
-  ]);
-
-  const formatearFecha = (fechaString) => {
-    const fecha = new Date(fechaString);
-    return fecha.toLocaleDateString('es-AR');
-  };
-
   return (
-    <div id="reportes-page" className="page active">
+    <div className="reportes-page">
       <div className="breadcrumb">
-        <Link to="/dashboard">Dashboard</Link> 
+        <Link to="/">Dashboard</Link>
         <span>Reportes</span>
       </div>
 
@@ -59,15 +25,15 @@ const Reportes = () => {
 
         <div className="summary-cards">
           <div className="summary-card-small">
-            <div className="number">{reportes.filter(r => r.periodo === 'Mensual').length}</div>
+            <div className="number">15</div>
             <div className="label">Reportes Mensuales</div>
           </div>
           <div className="summary-card-small">
-            <div className="number">{reportes.filter(r => r.periodo === 'Trimestral').length}</div>
+            <div className="number">8</div>
             <div className="label">Reportes Trimestrales</div>
           </div>
           <div className="summary-card-small">
-            <div className="number">{reportes.filter(r => r.periodo === 'Anual').length}</div>
+            <div className="number">3</div>
             <div className="label">Reportes Anuales</div>
           </div>
         </div>
@@ -106,30 +72,41 @@ const Reportes = () => {
             </tr>
           </thead>
           <tbody>
-            {reportes.map(reporte => (
-              <tr key={reporte.id}>
-                <td>{reporte.nombre}</td>
-                <td>{reporte.tipo}</td>
-                <td>{reporte.periodo}</td>
-                <td>{formatearFecha(reporte.fechaGeneracion)}</td>
-                <td>{reporte.generadoPor}</td>
-                <td>{reporte.tamaño}</td>
-                <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn" title="Descargar">📤</button>
-                    <button className="icon-btn" title="Ver">👁️</button>
-                    <button className="icon-btn" title="Eliminar">🗑️</button>
-                    <button className="icon-btn" title="Programar">⏰</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            <tr>
+              <td>Reporte Flota - Marzo 2024</td>
+              <td>Vehículos</td>
+              <td>Mensual</td>
+              <td>01/04/2024</td>
+              <td>Admin</td>
+              <td>2.5 MB</td>
+              <td>
+                <div className="action-buttons">
+                  <button className="icon-btn" title="Descargar">📤</button>
+                  <button className="icon-btn" title="Ver">👁️</button>
+                  <button className="icon-btn" title="Eliminar">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Consumo Combustible - Q1 2024</td>
+              <td>Combustible</td>
+              <td>Trimestral</td>
+              <td>05/04/2024</td>
+              <td>Admin</td>
+              <td>1.8 MB</td>
+              <td>
+                <div className="action-buttons">
+                  <button className="icon-btn" title="Descargar">📤</button>
+                  <button className="icon-btn" title="Ver">👁️</button>
+                  <button className="icon-btn" title="Eliminar">🗑️</button>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
-        <div className="contador">Mostrando {reportes.length} reportes</div>
       </section>
     </div>
-  );
-};
+  )
+}
 
-export default Reportes;
+export default Reportes
