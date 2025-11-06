@@ -1,30 +1,55 @@
-import React from 'react';
-import { useApp } from '../../../context/AppContext';
-import { useTableActions } from '../../../hooks/useTableActions';
-import { useFiltros } from '../../../hooks/useFiltros';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const VehiculosVendidos = () => {
-  const { vehiculosVendidos } = useApp();
-  const { generarBotonesAcciones } = useTableActions();
+  // Datos de ejemplo
+  const [vehiculosVendidos] = useState([
+    { 
+      id: 1, 
+      interno: 'V001', 
+      dominio: 'ABC123', 
+      modelo: 'Volvo FH16', 
+      fechaVenta: '2024-01-15', 
+      comprador: 'Empresa XYZ', 
+      precio: 150000, 
+      estadoDocumentacion: 'Completa' 
+    },
+    { 
+      id: 2, 
+      interno: 'V002', 
+      dominio: 'DEF456', 
+      modelo: 'Mercedes Actros', 
+      fechaVenta: '2024-02-20', 
+      comprador: 'Transportes ABC', 
+      precio: 120000, 
+      estadoDocumentacion: 'En trámite' 
+    }
+  ]);
 
-  const columnasConfig = [
-    { key: 'interno', label: 'Interno', visible: true },
-    { key: 'dominio', label: 'Dominio', visible: true },
-    { key: 'modelo', label: 'Marca/Modelo', visible: true },
-    { key: 'fechaVenta', label: 'Fecha Venta', visible: true },
-    { key: 'comprador', label: 'Comprador', visible: true },
-    { key: 'precio', label: 'Precio', visible: true },
-    { key: 'estadoDocumentacion', label: 'Estado Documentación', visible: true }
-  ];
+  const [filtros, setFiltros] = useState({
+    busqueda: '',
+    comprador: ''
+  });
 
-  const {
-    datosFiltrados,
-    filtros,
-    manejarBusqueda,
-    manejarFiltroEspecifico,
-    cantidadFiltrados,
-    cantidadTotal
-  } = useFiltros(vehiculosVendidos, columnasConfig);
+  const manejarBusqueda = (valor) => {
+    setFiltros(prev => ({ ...prev, busqueda: valor }));
+  };
+
+  const manejarFiltroEspecifico = (campo, valor) => {
+    setFiltros(prev => ({ ...prev, [campo]: valor }));
+  };
+
+  const datosFiltrados = vehiculosVendidos.filter(vehiculo => {
+    const coincideBusqueda = !filtros.busqueda || 
+      vehiculo.interno.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
+      vehiculo.dominio.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
+      vehiculo.modelo.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
+      vehiculo.comprador.toLowerCase().includes(filtros.busqueda.toLowerCase());
+    
+    const coincideComprador = !filtros.comprador || vehiculo.comprador === filtros.comprador;
+    
+    return coincideBusqueda && coincideComprador;
+  });
 
   const getEstadoClass = (estado) => {
     if (!estado) return '';
@@ -58,11 +83,19 @@ const VehiculosVendidos = () => {
     }).format(precio);
   };
 
+  const ColumnSelector = () => (
+    <div className="column-selector">
+      <button className="btn btn-secondary">
+        <span>👁️</span> Columnas
+      </button>
+    </div>
+  );
+
   return (
     <div>
       <div className="breadcrumb">
-        <a href="/dashboard">Dashboard</a> 
-        <span>Vehículos Vendidos</span>
+        <Link to="/dashboard">Dashboard</Link> 
+        <span> / Vehículos Vendidos</span>
       </div>
       
       <div className="summary-cards">
@@ -76,24 +109,7 @@ const VehiculosVendidos = () => {
         <div className="section-header">
           <h2 className="section-title">💰 Vehículos Vendidos</h2>
           <div className="table-toolbar">
-            <div className="column-selector">
-              <button className="btn btn-secondary">
-                <span>👁️</span> Columnas
-              </button>
-              <div className="column-selector-content">
-                {columnasConfig.map(columna => (
-                  <label key={columna.key} className="column-option">
-                    <input 
-                      type="checkbox" 
-                      checked={columna.visible} 
-                      onChange={() => {}} 
-                      disabled={columna.key === 'interno' || columna.key === 'dominio'}
-                    />
-                    {columna.label}
-                  </label>
-                ))}
-              </div>
-            </div>
+            <ColumnSelector />
             <button className="btn btn-secondary">
               <span>📤</span> Exportar
             </button>
@@ -117,14 +133,12 @@ const VehiculosVendidos = () => {
           >
             <option value="">Todos los compradores</option>
             <option value="Empresa XYZ">Empresa XYZ</option>
-            <option value="Empresa A">Empresa A</option>
-            <option value="Empresa B">Empresa B</option>
+            <option value="Transportes ABC">Transportes ABC</option>
           </select>
           <select className="filter-select">
             <option value="">Todos los años</option>
             <option value="2024">2024</option>
             <option value="2023">2023</option>
-            <option value="2022">2022</option>
           </select>
         </div>
 
@@ -157,18 +171,10 @@ const VehiculosVendidos = () => {
                 </td>
                 <td>
                   <div className="action-buttons">
-                    <button 
-                      className="icon-btn" 
-                      title="Ver"
-                      onClick={() => {}}
-                    >
+                    <button className="icon-btn" title="Ver">
                       👁️
                     </button>
-                    <button 
-                      className="icon-btn" 
-                      title="Documentación"
-                      onClick={() => {}}
-                    >
+                    <button className="icon-btn" title="Documentación">
                       📄
                     </button>
                   </div>
@@ -178,7 +184,7 @@ const VehiculosVendidos = () => {
           </tbody>
         </table>
         <div className="contador">
-          Mostrando {cantidadFiltrados} de {cantidadTotal} vehículos vendidos
+          Mostrando {datosFiltrados.length} de {vehiculosVendidos.length} vehículos vendidos
         </div>
       </section>
     </div>

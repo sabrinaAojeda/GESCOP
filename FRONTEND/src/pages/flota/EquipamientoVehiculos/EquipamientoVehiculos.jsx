@@ -1,31 +1,56 @@
-import React from 'react';
-import { useApp } from '../../../context/AppContext';
-import { useTableActions } from '../../../hooks/useTableActions';
-import { useFiltros } from '../../../hooks/useFiltros';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const EquipamientoVehiculos = () => {
-  const { equipamiento } = useApp();
-  const { generarBotonesAcciones, manejarAccion } = useTableActions();
+  // Datos de ejemplo
+  const [equipamiento] = useState([
+    {
+      id: 1,
+      codigo: 'EQ001',
+      descripcion: 'GPS Garmin',
+      tipo: 'GPS',
+      vehiculoAsignado: 'ABC123',
+      estado: 'Operativo',
+      ultimaRevision: '2024-01-10',
+      proximaRevision: '2024-07-10'
+    },
+    {
+      id: 2,
+      codigo: 'EQ002',
+      descripcion: 'Radio Kenwood',
+      tipo: 'Radio',
+      vehiculoAsignado: 'DEF456',
+      estado: 'Mantenimiento',
+      ultimaRevision: '2023-12-15',
+      proximaRevision: '2024-06-15'
+    }
+  ]);
 
-  const columnasConfig = [
-    { key: 'codigo', label: 'Código', visible: true },
-    { key: 'descripcion', label: 'Descripción', visible: true },
-    { key: 'tipo', label: 'Tipo', visible: true },
-    { key: 'vehiculoAsignado', label: 'Vehículo Asignado', visible: true },
-    { key: 'estado', label: 'Estado', visible: true },
-    { key: 'ultimaRevision', label: 'Última Revisión', visible: true },
-    { key: 'proximaRevision', label: 'Próxima Revisión', visible: true },
-    { key: 'observaciones', label: 'Observaciones', visible: false }
-  ];
+  const [filtros, setFiltros] = useState({
+    busqueda: '',
+    tipo: '',
+    estado: ''
+  });
 
-  const {
-    datosFiltrados,
-    filtros,
-    manejarBusqueda,
-    manejarFiltroEspecifico,
-    cantidadFiltrados,
-    cantidadTotal
-  } = useFiltros(equipamiento, columnasConfig);
+  const manejarBusqueda = (valor) => {
+    setFiltros(prev => ({ ...prev, busqueda: valor }));
+  };
+
+  const manejarFiltroEspecifico = (campo, valor) => {
+    setFiltros(prev => ({ ...prev, [campo]: valor }));
+  };
+
+  const datosFiltrados = equipamiento.filter(item => {
+    const coincideBusqueda = !filtros.busqueda || 
+      item.codigo.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
+      item.descripcion.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
+      item.tipo.toLowerCase().includes(filtros.busqueda.toLowerCase());
+    
+    const coincideTipo = !filtros.tipo || item.tipo === filtros.tipo;
+    const coincideEstado = !filtros.estado || item.estado === filtros.estado;
+    
+    return coincideBusqueda && coincideTipo && coincideEstado;
+  });
 
   const getEstadoClass = (estado) => {
     if (!estado) return '';
@@ -51,17 +76,25 @@ const EquipamientoVehiculos = () => {
     }
   };
 
+  const ColumnSelector = () => (
+    <div className="column-selector">
+      <button className="btn btn-secondary">
+        <span>👁️</span> Columnas
+      </button>
+    </div>
+  );
+
   return (
     <div>
       <div className="breadcrumb">
-        <a href="/dashboard">Dashboard</a> 
-        <span>Equipamiento</span>
+        <Link to="/dashboard">Dashboard</Link> 
+        <span> / Equipamiento</span>
       </div>
       
       <div className="summary-cards">
         <div className="summary-card-small">
-          <div className="number">{equipamiento.length}</div>
-          <div className="label">ítems operativo</div>
+          <div className="number">{equipamiento.filter(item => item.estado === 'Operativo').length}</div>
+          <div className="label">ítems operativos</div>
         </div>
       </div>
 
@@ -69,24 +102,7 @@ const EquipamientoVehiculos = () => {
         <div className="section-header">
           <h2 className="section-title">🔧 Equipamiento</h2>
           <div className="table-toolbar">
-            <div className="column-selector">
-              <button className="btn btn-secondary">
-                <span>👁️</span> Columnas
-              </button>
-              <div className="column-selector-content">
-                {columnasConfig.map(columna => (
-                  <label key={columna.key} className="column-option">
-                    <input 
-                      type="checkbox" 
-                      checked={columna.visible} 
-                      onChange={() => {}} 
-                      disabled={columna.key === 'codigo' || columna.key === 'descripcion'}
-                    />
-                    {columna.label}
-                  </label>
-                ))}
-              </div>
-            </div>
+            <ColumnSelector />
             <button className="btn btn-secondary">
               <span>📤</span> Exportar
             </button>
@@ -112,7 +128,6 @@ const EquipamientoVehiculos = () => {
             <option value="GPS">GPS</option>
             <option value="Radio">Radio</option>
             <option value="Cámara">Cámara</option>
-            <option value="Herramientas">Herramientas</option>
           </select>
           <select 
             className="filter-select"
@@ -153,14 +168,24 @@ const EquipamientoVehiculos = () => {
                 <td>{formatearFecha(item.ultimaRevision)}</td>
                 <td>{formatearFecha(item.proximaRevision)}</td>
                 <td>
-                  {generarBotonesAcciones('vehiculo', item.id, item, manejarAccion)}
+                  <div className="action-buttons">
+                    <button className="icon-btn" title="Ver">
+                      👁️
+                    </button>
+                    <button className="icon-btn" title="Editar">
+                      ✏️
+                    </button>
+                    <button className="icon-btn" title="Historial">
+                      📊
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
         <div className="contador">
-          Mostrando {cantidadFiltrados} de {cantidadTotal} ítems de equipamiento
+          Mostrando {datosFiltrados.length} de {equipamiento.length} ítems de equipamiento
         </div>
       </section>
     </div>
