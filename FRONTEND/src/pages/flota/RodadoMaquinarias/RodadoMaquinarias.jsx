@@ -113,13 +113,17 @@ const RodadoMaquinarias = () => {
 
   // Handlers para CRUD
   const handleCrearVehiculo = (datosVehiculo) => {
+    console.log('Creando vehículo:', datosVehiculo);
     agregarVehiculo(datosVehiculo);
     cerrarModal();
+    alert('Vehículo creado correctamente');
   };
 
   const handleActualizarVehiculo = (datosVehiculo) => {
+    console.log('Actualizando vehículo:', datosVehiculo);
     actualizarVehiculo(vehiculoSeleccionado.id, datosVehiculo);
     cerrarModal();
+    alert('Vehículo actualizado correctamente');
   };
 
   const handleEliminarVehiculo = (id) => {
