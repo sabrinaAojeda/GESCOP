@@ -1,4 +1,5 @@
 import React from 'react';
+import './ColumnSelector.css';
 
 const ColumnSelector = ({ columnasVisibles, onToggleColumna, onClose }) => {
     const gruposColumnas = [

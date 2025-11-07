@@ -1,5 +1,6 @@
+// src/components/Common/ModalDocumentation.jsx
 import React, { useState } from 'react'
-import '../../ModalVehiculo.css'
+import './ModalVehiculo.css'
 
 const ModalDocumentation = ({ vehiculo, onClose, onSave }) => {
   const [documentos, setDocumentos] = useState(vehiculo?.documentos || [])

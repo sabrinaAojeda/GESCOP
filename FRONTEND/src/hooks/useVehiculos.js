@@ -1,3 +1,4 @@
+// src/hooks/useVehiculos.js
 import { useState, useEffect } from 'react'
 
 export const useVehiculos = () => {
@@ -6,11 +7,9 @@ export const useVehiculos = () => {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    // Simular carga de datos
     const loadVehiculos = async () => {
       try {
         setLoading(true)
-        // En una implementación real, esto sería una llamada a la API
         setTimeout(() => {
           const mockData = [
             {
@@ -30,7 +29,71 @@ export const useVehiculos = () => {
               habilitacionEstado: "Vigente",
               tipoSeguro: "Todo Riesgo",
               seguroTecnico: "Vigente",
-              seguroCargas: "No requiere"
+              seguroCargas: "No requiere",
+              documentos: [
+                { 
+                  id: 1, 
+                  tipo: "Seguro", 
+                  vencimiento: "2024-06-15", 
+                  estado: "Vigente", 
+                  archivo: "seguro_001.pdf" 
+                },
+                { 
+                  id: 2, 
+                  tipo: "VTV", 
+                  vencimiento: "2024-03-01", 
+                  estado: "Vencido", 
+                  archivo: "vtv_001.pdf" 
+                }
+              ]
+            },
+            {
+              id: 2,
+              interno: "002",
+              anio: 2022,
+              dominio: "EF-456-GH",
+              modelo: "Ford Ranger XLT",
+              eqIncorporado: "Radio",
+              sector: "Producción",
+              chofer: "",
+              estado: "Mantenimiento",
+              observaciones: "En taller por reparación",
+              vtvVencimiento: "2024-04-10",
+              vtvEstado: "Por vencer",
+              habilitacionVencimiento: "2024-08-15",
+              habilitacionEstado: "Vigente",
+              tipoSeguro: "Terceros Completo",
+              seguroTecnico: "Vigente",
+              seguroCargas: "No requiere",
+              documentos: []
+            },
+            {
+              id: 3,
+              interno: "003",
+              anio: 2021,
+              dominio: "IJ-789-KL",
+              modelo: "Mercedes-Benz Sprinter",
+              eqIncorporado: "GPS, Radio, Cámara",
+              sector: "Logística",
+              chofer: "María García",
+              estado: "Activo",
+              observaciones: "",
+              vtvVencimiento: "2024-03-01",
+              vtvEstado: "Vencido",
+              habilitacionVencimiento: "2024-09-30",
+              habilitacionEstado: "Vigente",
+              tipoSeguro: "Todo Riesgo",
+              seguroTecnico: "Vigente",
+              seguroCargas: "Vigente",
+              documentos: [
+                { 
+                  id: 3, 
+                  tipo: "Seguro", 
+                  vencimiento: "2024-09-30", 
+                  estado: "Vigente", 
+                  archivo: "seguro_003.pdf" 
+                }
+              ]
             }
           ]
           setVehiculos(mockData)
@@ -46,7 +109,12 @@ export const useVehiculos = () => {
   }, [])
 
   const agregarVehiculo = (nuevoVehiculo) => {
-    setVehiculos(prev => [...prev, { ...nuevoVehiculo, id: Date.now() }])
+    const vehiculoConId = {
+      ...nuevoVehiculo,
+      id: Date.now(),
+      documentos: []
+    }
+    setVehiculos(prev => [...prev, vehiculoConId])
   }
 
   const actualizarVehiculo = (id, datosActualizados) => {
