@@ -1,71 +1,150 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+// src/pages/flota/EquipamientoVehiculos/EquipamientoVehiculos.jsx
+import React, { useState, useEffect } from "react";
+import { useEquipamientos } from "@hooks/useEquipamientos";
+import GenericModal from "@components/Common/GenericModal";
+import ColumnSelectorEquipamientos from "@components/Common/ColumnSelectorEquipamientos";
+import ModalEquipamiento from "@components/Common/ModalEquipamiento";
+import ModalDocumentacion from "@components/Common/ModalDocumentacion";
+import "./EquipamientoVehiculos.css";
 
 const EquipamientoVehiculos = () => {
-  // Datos de ejemplo
-  const [equipamiento] = useState([
-    {
-      id: 1,
-      codigo: 'EQ001',
-      descripcion: 'GPS Garmin',
-      tipo: 'GPS',
-      vehiculoAsignado: 'ABC123',
-      estado: 'Operativo',
-      ultimaRevision: '2024-01-10',
-      proximaRevision: '2024-07-10'
-    },
-    {
-      id: 2,
-      codigo: 'EQ002',
-      descripcion: 'Radio Kenwood',
-      tipo: 'Radio',
-      vehiculoAsignado: 'DEF456',
-      estado: 'Mantenimiento',
-      ultimaRevision: '2023-12-15',
-      proximaRevision: '2024-06-15'
-    }
-  ]);
-
+  const { equipamientos, loading, error, agregarEquipamiento, actualizarEquipamiento, eliminarEquipamiento } = useEquipamientos();
+  
+  // Estados para la gestión de la UI
+  const [equipamientosFiltrados, setEquipamientosFiltrados] = useState([]);
+  const [modalAbierto, setModalAbierto] = useState(null);
+  const [equipamientoSeleccionado, setEquipamientoSeleccionado] = useState(null);
+  const [mostrarColumnSelector, setMostrarColumnSelector] = useState(false);
   const [filtros, setFiltros] = useState({
-    busqueda: '',
+    buscar: '',
     tipo: '',
-    estado: ''
+    estado: '',
+    vehiculo_asignado: ''
   });
 
-  const manejarBusqueda = (valor) => {
-    setFiltros(prev => ({ ...prev, busqueda: valor }));
-  };
-
-  const manejarFiltroEspecifico = (campo, valor) => {
-    setFiltros(prev => ({ ...prev, [campo]: valor }));
-  };
-
-  const datosFiltrados = equipamiento.filter(item => {
-    const coincideBusqueda = !filtros.busqueda || 
-      item.codigo.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
-      item.descripcion.toLowerCase().includes(filtros.busqueda.toLowerCase()) ||
-      item.tipo.toLowerCase().includes(filtros.busqueda.toLowerCase());
-    
-    const coincideTipo = !filtros.tipo || item.tipo === filtros.tipo;
-    const coincideEstado = !filtros.estado || item.estado === filtros.estado;
-    
-    return coincideBusqueda && coincideTipo && coincideEstado;
+  // Estado para columnas visibles
+  const [columnasVisibles, setColumnasVisibles] = useState({
+    'codigo': true,
+    'descripcion': true,
+    'tipo': true,
+    'vehiculo_asignado': true,
+    'estado': true,
+    'ultima_revision': false,
+    'proxima_revision': true,
+    'observaciones': false
   });
 
-  const getEstadoClass = (estado) => {
-    if (!estado) return '';
-    switch(estado.toLowerCase()) {
-      case 'operativo':
-        return 'status-active';
-      case 'mantenimiento':
-        return 'status-warning';
-      case 'inactivo':
-        return 'status-expired';
-      default:
-        return '';
+  // Efecto para aplicar filtros
+  useEffect(() => {
+    let resultados = equipamientos;
+    
+    // Filtro de búsqueda
+    if (filtros.buscar) {
+      const termino = filtros.buscar.toLowerCase();
+      resultados = resultados.filter(equipamiento =>
+        equipamiento.codigo?.toLowerCase().includes(termino) ||
+        equipamiento.descripcion?.toLowerCase().includes(termino) ||
+        equipamiento.vehiculo_asignado?.toLowerCase().includes(termino)
+      );
+    }
+    
+    // Filtro por tipo
+    if (filtros.tipo) {
+      resultados = resultados.filter(equipamiento => equipamiento.tipo === filtros.tipo);
+    }
+    
+    // Filtro por estado
+    if (filtros.estado) {
+      resultados = resultados.filter(equipamiento => equipamiento.estado === filtros.estado);
+    }
+
+    // Filtro por vehículo asignado
+    if (filtros.vehiculo_asignado) {
+      if (filtros.vehiculo_asignado === 'sin_asignar') {
+        resultados = resultados.filter(equipamiento => !equipamiento.vehiculo_asignado);
+      } else {
+        resultados = resultados.filter(equipamiento => equipamiento.vehiculo_asignado === filtros.vehiculo_asignado);
+      }
+    }
+    
+    setEquipamientosFiltrados(resultados);
+  }, [equipamientos, filtros]);
+
+  // Handlers para los modales
+  const abrirModalNuevo = () => {
+    setModalAbierto('nuevo');
+    setEquipamientoSeleccionado(null);
+  };
+
+  const abrirModalVer = (equipamiento) => {
+    setModalAbierto('ver');
+    setEquipamientoSeleccionado(equipamiento);
+  };
+
+  const abrirModalEditar = (equipamiento) => {
+    setModalAbierto('editar');
+    setEquipamientoSeleccionado(equipamiento);
+  };
+
+  const abrirModalDocumentacion = (equipamiento) => {
+    setModalAbierto('documentacion');
+    setEquipamientoSeleccionado(equipamiento);
+  };
+
+  const cerrarModal = () => {
+    setModalAbierto(null);
+    setEquipamientoSeleccionado(null);
+  };
+
+  // Handlers para ColumnSelector
+  const abrirColumnSelector = () => {
+    setMostrarColumnSelector(true);
+  };
+
+  const cerrarColumnSelector = () => {
+    setMostrarColumnSelector(false);
+  };
+
+  const toggleColumna = (columnaKey) => {
+    setColumnasVisibles(prev => ({
+      ...prev,
+      [columnaKey]: !prev[columnaKey]
+    }));
+  };
+
+  // Handlers para CRUD
+  const handleCrearEquipamiento = (datosEquipamiento) => {
+    console.log('Creando equipamiento:', datosEquipamiento);
+    agregarEquipamiento(datosEquipamiento);
+    cerrarModal();
+    alert('Equipamiento creado correctamente');
+  };
+
+  const handleActualizarEquipamiento = (datosEquipamiento) => {
+    console.log('Actualizando equipamiento:', datosEquipamiento);
+    actualizarEquipamiento(equipamientoSeleccionado.id, datosEquipamiento);
+    cerrarModal();
+    alert('Equipamiento actualizado correctamente');
+  };
+
+  const handleEliminarEquipamiento = (id) => {
+    const equipamiento = equipamientos.find(e => e.id === id);
+    if (equipamiento && window.confirm(`¿Está seguro de eliminar el equipamiento ${equipamiento.codigo} - ${equipamiento.descripcion}? Esta acción no se puede deshacer.`)) {
+      eliminarEquipamiento(id);
     }
   };
 
+  const handleGuardarDocumentacion = (documentos) => {
+    if (equipamientoSeleccionado) {
+      actualizarEquipamiento(equipamientoSeleccionado.id, {
+        ...equipamientoSeleccionado,
+        documentos: documentos
+      });
+    }
+    cerrarModal();
+  };
+
+  // Función para formatear fecha
   const formatearFecha = (fechaString) => {
     if (!fechaString) return '';
     try {
@@ -76,118 +155,378 @@ const EquipamientoVehiculos = () => {
     }
   };
 
-  const ColumnSelector = () => (
-    <div className="column-selector">
-      <button className="btn btn-secondary">
-        <span>👁️</span> Columnas
-      </button>
-    </div>
-  );
+  // Función para obtener clase de estado
+  const getEstadoClass = (estado) => {
+    if (!estado) return '';
+    switch(estado.toLowerCase()) {
+      case 'operativo':
+        return 'status-active';
+      case 'almacenado':
+        return 'status-warning';
+      case 'mantenimiento':
+        return 'status-warning';
+      case 'vencido':
+        return 'status-expired';
+      default:
+        return '';
+    }
+  };
+
+  // Función para verificar si está próximo a vencer
+  const estaProximoVencer = (fechaString) => {
+    if (!fechaString) return false;
+    try {
+      const fecha = new Date(fechaString);
+      const hoy = new Date();
+      const diffTime = fecha - hoy;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays <= 30 && diffDays > 0;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Función para verificar si está vencido
+  const estaVencido = (fechaString) => {
+    if (!fechaString) return false;
+    try {
+      const fecha = new Date(fechaString);
+      const hoy = new Date();
+      return fecha < hoy;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  if (loading) return <div className="loading">Cargando equipamientos...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
 
   return (
-    <div>
+    <div className="equipamiento-vehiculos-page">
+      {/* Breadcrumb */}
       <div className="breadcrumb">
-        <Link to="/dashboard">Dashboard</Link> 
-        <span> / Equipamiento</span>
+        <a href="#" onClick={() => window.history.back()}>Dashboard</a>
+        <span>Equipamiento de Vehículos</span>
       </div>
-      
+
+      {/* Resumen */}
       <div className="summary-cards">
         <div className="summary-card-small">
-          <div className="number">{equipamiento.filter(item => item.estado === 'Operativo').length}</div>
-          <div className="label">ítems operativos</div>
+          <div className="number">{equipamientos.length}</div>
+          <div className="label">Total Equipamientos</div>
+        </div>
+        <div className="summary-card-small">
+          <div className="number">
+            {equipamientos.filter(e => e.estado === 'Operativo').length}
+          </div>
+          <div className="label">Operativos</div>
+        </div>
+        <div className="summary-card-small">
+          <div className="number">
+            {equipamientos.filter(e => estaProximoVencer(e.proxima_revision)).length}
+          </div>
+          <div className="label">Próximos a Vencer</div>
+        </div>
+        <div className="summary-card-small">
+          <div className="number">
+            {equipamientos.filter(e => !e.vehiculo_asignado).length}
+          </div>
+          <div className="label">Sin Asignar</div>
         </div>
       </div>
 
+      {/* Sección Principal */}
       <section className="data-section">
         <div className="section-header">
-          <h2 className="section-title">🔧 Equipamiento</h2>
+          <h2 className="section-title">🔧 Equipamiento de Vehículos</h2>
           <div className="table-toolbar">
-            <ColumnSelector />
+            <button className="btn btn-secondary" onClick={abrirColumnSelector}>
+              <span>👁️</span> Columnas
+            </button>
             <button className="btn btn-secondary">
               <span>📤</span> Exportar
             </button>
-            <button className="btn btn-primary">
+            <button className="btn btn-primary" onClick={abrirModalNuevo}>
               <span>+</span> Nuevo Equipamiento
             </button>
           </div>
         </div>
 
+        {/* Filtros */}
         <div className="filter-bar">
           <input 
             type="text" 
             className="filter-select" 
-            placeholder="Buscar..." 
-            value={filtros.busqueda}
-            onChange={(e) => manejarBusqueda(e.target.value)}
+            placeholder="Buscar por código, descripción, vehículo..." 
+            value={filtros.buscar}
+            onChange={(e) => setFiltros(prev => ({ ...prev, buscar: e.target.value }))}
           />
           <select 
-            className="filter-select"
-            onChange={(e) => manejarFiltroEspecifico('tipo', e.target.value)}
+            className="filter-select" 
+            value={filtros.tipo}
+            onChange={(e) => setFiltros(prev => ({ ...prev, tipo: e.target.value }))}
           >
             <option value="">Todos los tipos</option>
-            <option value="GPS">GPS</option>
-            <option value="Radio">Radio</option>
-            <option value="Cámara">Cámara</option>
+            <option value="Navegación">Navegación</option>
+            <option value="Comunicación">Comunicación</option>
+            <option value="Seguridad">Seguridad</option>
+            <option value="Control">Control</option>
+            <option value="Otros">Otros</option>
           </select>
           <select 
-            className="filter-select"
-            onChange={(e) => manejarFiltroEspecifico('estado', e.target.value)}
+            className="filter-select" 
+            value={filtros.estado}
+            onChange={(e) => setFiltros(prev => ({ ...prev, estado: e.target.value }))}
           >
             <option value="">Todos los estados</option>
             <option value="Operativo">Operativo</option>
+            <option value="Almacenado">Almacenado</option>
             <option value="Mantenimiento">Mantenimiento</option>
-            <option value="Inactivo">Inactivo</option>
+            <option value="Vencido">Vencido</option>
+          </select>
+          <select 
+            className="filter-select" 
+            value={filtros.vehiculo_asignado}
+            onChange={(e) => setFiltros(prev => ({ ...prev, vehiculo_asignado: e.target.value }))}
+          >
+            <option value="">Todos los vehículos</option>
+            <option value="sin_asignar">Sin asignar</option>
+            <option value="AB-123-CD">AB-123-CD</option>
+            <option value="EF-456-GH">EF-456-GH</option>
+            <option value="IJ-789-KL">IJ-789-KL</option>
+            <option value="MA-001-AA">MA-001-AA</option>
           </select>
         </div>
 
+        {/* Tabla */}
         <table className="data-table">
           <thead>
             <tr>
-              <th>Código</th>
-              <th>Descripción</th>
-              <th>Tipo</th>
-              <th>Vehículo Asignado</th>
-              <th>Estado</th>
-              <th>Última Revisión</th>
-              <th>Próxima Revisión</th>
-              <th>Acciones</th>
+              {columnasVisibles.codigo && <th>CÓDIGO</th>}
+              {columnasVisibles.descripcion && <th>DESCRIPCIÓN</th>}
+              {columnasVisibles.tipo && <th>TIPO</th>}
+              {columnasVisibles.vehiculo_asignado && <th>VEHÍCULO ASIG.</th>}
+              {columnasVisibles.estado && <th>ESTADO</th>}
+              {columnasVisibles.ultima_revision && <th>ÚLT. REVISIÓN</th>}
+              {columnasVisibles.proxima_revision && <th>PRÓX. REVISIÓN</th>}
+              {columnasVisibles.observaciones && <th>OBSERVACIONES</th>}
+              <th>ACCIONES</th>
             </tr>
           </thead>
           <tbody>
-            {datosFiltrados.map(item => (
-              <tr key={item.id}>
-                <td>{item.codigo}</td>
-                <td>{item.descripcion}</td>
-                <td>{item.tipo}</td>
-                <td>{item.vehiculoAsignado}</td>
-                <td>
-                  <span className={`status-badge ${getEstadoClass(item.estado)}`}>
-                    {item.estado}
-                  </span>
-                </td>
-                <td>{formatearFecha(item.ultimaRevision)}</td>
-                <td>{formatearFecha(item.proximaRevision)}</td>
-                <td>
-                  <div className="action-buttons">
-                    <button className="icon-btn" title="Ver">
-                      👁️
-                    </button>
-                    <button className="icon-btn" title="Editar">
-                      ✏️
-                    </button>
-                    <button className="icon-btn" title="Historial">
-                      📊
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {equipamientosFiltrados.map(equipamiento => {
+              const proximoVencer = estaProximoVencer(equipamiento.proxima_revision);
+              const vencido = estaVencido(equipamiento.proxima_revision);
+              
+              return (
+                <tr key={equipamiento.id}>
+                  {columnasVisibles.codigo && <td>{equipamiento.codigo}</td>}
+                  {columnasVisibles.descripcion && <td>{equipamiento.descripcion}</td>}
+                  {columnasVisibles.tipo && <td>{equipamiento.tipo}</td>}
+                  {columnasVisibles.vehiculo_asignado && <td>{equipamiento.vehiculo_asignado || 'No asignado'}</td>}
+                  {columnasVisibles.estado && (
+                    <td>
+                      <span className={`status-badge ${getEstadoClass(equipamiento.estado)}`}>
+                        {equipamiento.estado}
+                      </span>
+                    </td>
+                  )}
+                  {columnasVisibles.ultima_revision && <td>{formatearFecha(equipamiento.ultima_revision)}</td>}
+                  {columnasVisibles.proxima_revision && (
+                    <td>
+                      <span className={`status-badge ${
+                        vencido ? 'status-expired' : 
+                        proximoVencer ? 'status-warning' : 
+                        'status-active'
+                      }`}>
+                        {formatearFecha(equipamiento.proxima_revision)}
+                      </span>
+                    </td>
+                  )}
+                  {columnasVisibles.observaciones && <td>{equipamiento.observaciones || '-'}</td>}
+                  <td>
+                    <div className="action-buttons">
+                      <button 
+                        className="icon-btn" 
+                        title="Ver" 
+                        onClick={() => abrirModalVer(equipamiento)}
+                      >
+                        👁️
+                      </button>
+                      <button 
+                        className="icon-btn" 
+                        title="Editar" 
+                        onClick={() => abrirModalEditar(equipamiento)}
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        className="icon-btn" 
+                        title="Documentación" 
+                        onClick={() => abrirModalDocumentacion(equipamiento)}
+                      >
+                        📄
+                      </button>
+                      <button 
+                        className="icon-btn" 
+                        title="Eliminar" 
+                        onClick={() => handleEliminarEquipamiento(equipamiento.id)}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+        
         <div className="contador">
-          Mostrando {datosFiltrados.length} de {equipamiento.length} ítems de equipamiento
+          Mostrando {equipamientosFiltrados.length} de {equipamientos.length} equipamientos
         </div>
       </section>
+
+      {/* Modal Ver Equipamiento */}
+      {modalAbierto === 'ver' && equipamientoSeleccionado && (
+        <GenericModal
+          title={`👁️ Detalles del Equipamiento - ${equipamientoSeleccionado.codigo}`}
+          onClose={cerrarModal}
+          size="large"
+        >
+          <div className="equipamiento-details-modal">
+            <div className="vehicle-details-grid">
+              <div>
+                <div className="detail-group">
+                  <div className="detail-label">Código</div>
+                  <div className="detail-value">{equipamientoSeleccionado.codigo}</div>
+                </div>
+                <div className="detail-group">
+                  <div className="detail-label">Descripción</div>
+                  <div className="detail-value">{equipamientoSeleccionado.descripcion}</div>
+                </div>
+                <div className="detail-group">
+                  <div className="detail-label">Tipo</div>
+                  <div className="detail-value">{equipamientoSeleccionado.tipo}</div>
+                </div>
+                <div className="detail-group">
+                  <div className="detail-label">Vehículo Asignado</div>
+                  <div className="detail-value">{equipamientoSeleccionado.vehiculo_asignado || 'No asignado'}</div>
+                </div>
+              </div>
+              <div>
+                <div className="detail-group">
+                  <div className="detail-label">Estado</div>
+                  <div className="detail-value">
+                    <span className={`status-badge ${getEstadoClass(equipamientoSeleccionado.estado)}`}>
+                      {equipamientoSeleccionado.estado}
+                    </span>
+                  </div>
+                </div>
+                <div className="detail-group">
+                  <div className="detail-label">Última Revisión</div>
+                  <div className="detail-value">{formatearFecha(equipamientoSeleccionado.ultima_revision) || 'No registrada'}</div>
+                </div>
+                <div className="detail-group">
+                  <div className="detail-label">Próxima Revisión</div>
+                  <div className="detail-value">
+                    <span className={`status-badge ${
+                      estaVencido(equipamientoSeleccionado.proxima_revision) ? 'status-expired' : 
+                      estaProximoVencer(equipamientoSeleccionado.proxima_revision) ? 'status-warning' : 
+                      'status-active'
+                    }`}>
+                      {formatearFecha(equipamientoSeleccionado.proxima_revision) || 'No programada'}
+                    </span>
+                  </div>
+                </div>
+                <div className="detail-group">
+                  <div className="detail-label">Observaciones</div>
+                  <div className="detail-value">{equipamientoSeleccionado.observaciones || 'Sin observaciones'}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="documents-section">
+              <h3 className="form-section-title">📄 Documentación Asociada</h3>
+              <div className="document-cards">
+                {equipamientoSeleccionado.documentos && equipamientoSeleccionado.documentos.length > 0 ? (
+                  equipamientoSeleccionado.documentos.map(doc => (
+                    <div key={doc.id} className="document-card">
+                      <div className="document-card-header">
+                        <div className="document-card-title">{doc.tipo}</div>
+                        <span className={`document-card-status status-badge ${getEstadoClass(doc.estado)}`}>
+                          {doc.estado}
+                        </span>
+                      </div>
+                      <div className="detail-group">
+                        <div className="detail-label">Vencimiento</div>
+                        <div className="detail-value">{formatearFecha(doc.vencimiento) || 'No aplica'}</div>
+                      </div>
+                      <div className="detail-group">
+                        <div className="detail-label">Archivo</div>
+                        <div className="detail-value">{doc.archivo}</div>
+                      </div>
+                      <div className="action-buttons" style={{marginTop: '10px'}}>
+                        <button className="icon-btn" title="Descargar">📤</button>
+                        <button className="icon-btn" title="Ver">👁️</button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No hay documentos asociados a este equipamiento.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="modal-vehiculo-actions">
+              <button className="btn btn-secondary" onClick={cerrarModal}>
+                Cerrar
+              </button>
+              <button className="btn btn-primary" onClick={() => {
+                cerrarModal();
+                setTimeout(() => abrirModalEditar(equipamientoSeleccionado), 300);
+              }}>
+                Editar Equipamiento
+              </button>
+            </div>
+          </div>
+        </GenericModal>
+      )}
+
+      {/* Modales existentes */}
+      {modalAbierto === 'nuevo' && (
+        <ModalEquipamiento
+          mode="crear"
+          onClose={cerrarModal}
+          onSave={handleCrearEquipamiento}
+        />
+      )}
+
+      {modalAbierto === 'editar' && equipamientoSeleccionado && (
+        <ModalEquipamiento
+          mode="editar"
+          equipamiento={equipamientoSeleccionado}
+          onClose={cerrarModal}
+          onSave={handleActualizarEquipamiento}
+        />
+      )}
+
+      {modalAbierto === 'documentacion' && equipamientoSeleccionado && (
+        <ModalDocumentacion
+          vehiculo={equipamientoSeleccionado}
+          onClose={cerrarModal}
+          onSave={handleGuardarDocumentacion}
+        />
+      )}
+
+      {/* Column Selector Modal */}
+      {mostrarColumnSelector && (
+        <ColumnSelectorEquipamientos
+          columnasVisibles={columnasVisibles}
+          onToggleColumna={toggleColumna}
+          onClose={cerrarColumnSelector}
+        />
+      )}
     </div>
   );
 };
